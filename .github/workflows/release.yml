@@ -1,0 +1,40 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: package-lock.json
+      - run: npm ci
+      - name: Check version matches tag
+        run: bash .github/scripts/check-version.sh "${GITHUB_REF_NAME}"
+      - run: npm run build
+      - name: Stage plugin bundle
+        run: |
+          mkdir -p _bundle/xenith
+          cp -r dist backend xenith.yml requirements.txt README.md LICENSE _bundle/xenith/
+      - name: Build zip
+        working-directory: _bundle
+        run: zip -r ../xenith.zip xenith -x "*__pycache__*"
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          PRERELEASE_FLAG=""
+          if [[ "${GITHUB_REF_NAME}" == *-* ]]; then
+            PRERELEASE_FLAG="--prerelease"
+          fi
+          gh release create "${GITHUB_REF_NAME}" xenith.zip --generate-notes $PRERELEASE_FLAG

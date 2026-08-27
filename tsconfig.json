@@ -1,0 +1,13 @@
+{
+  "compilerOptions": {
+    "checkJs": true,
+    "noEmit": true,
+    "jsx": "react",
+    "target": "ES2020",
+    "moduleResolution": "bundler",
+    "allowArbitraryExtensions": true,
+    "allowJs": true,
+    "noImplicitAny": false
+  },
+  "include": ["src/**/*"]
+}

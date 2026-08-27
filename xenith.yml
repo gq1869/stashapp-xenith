@@ -1,0 +1,93 @@
+name: Xenith
+description: "Elo-based head-to-head ranking and leaderboard for performers and scenes."
+version: 3.0.0
+
+interface: raw
+errLog: debug
+exec:
+  - python
+  - "{pluginDir}/backend/main.py"
+
+ui:
+  javascript:
+    - /dist/xenith.js
+  css:
+    - /dist/xenith.css
+  assets:
+    /: snapshots
+
+tasks:
+  - name: "Wipe Match History"
+    description: Clears Xenith custom fields on performers and scenes, keeps ratings intact.
+    execArgs:
+      - wipe
+
+  - name: "Wipe Match History (Performers Only)"
+    description: Clears Xenith custom fields on performers only, keeps ratings intact.
+    execArgs:
+      - wipe
+      - performers
+
+  - name: "Wipe Match History (Scenes Only)"
+    description: Clears Xenith custom fields on scenes only, keeps ratings intact.
+    execArgs:
+      - wipe
+      - scenes
+
+  - name: "Reset Ratings"
+    description: Resets all performer and scene ratings to null.
+    execArgs:
+      - reset
+
+  - name: "Reset Ratings (Performers Only)"
+    description: Resets performer ratings to null.
+    execArgs:
+      - reset
+      - performers
+
+  - name: "Reset Ratings (Scenes Only)"
+    description: Resets scene ratings to null.
+    execArgs:
+      - reset
+      - scenes
+
+  - name: "Export Snapshot"
+    description: Writes ratings and match history to a timestamped JSON file.
+    execArgs:
+      - snapshot_export
+
+  - name: "Import Latest Snapshot"
+    description: Restores ratings and match history from the most recent snapshot.
+    execArgs:
+      - snapshot_import
+
+  - name: "Migrate Legacy Field Names"
+    description: Copies legacy hotornot_stats/performer_record data to the xenith_ keys. Exports a pre-migration snapshot first. Safe to re-run.
+    execArgs:
+      - migrate
+
+settings:
+  HideXenRankBadge:
+    displayName: Hide Xenith Rank Badge
+    description: Hide the rank badge on performer/scene pages/cards.
+    type: BOOLEAN
+
+  LeaderboardRowsPerPage:
+    displayName: Leaderboard Rows Per Page (Mobile)
+    description: Rows per leaderboard page on mobile. Desktop renders 5x this value. Leave at 0 for automatic (100 mobile / 500 desktop). Lower it if the table feels slow, raise it for fewer pages.
+    type: NUMBER
+
+  UseCustomaryUnits:
+    displayName: Use Customary Units
+    description: Show height and weight in feet/inches and pounds instead of centimeters and kilograms. Off by default — metric. Check to show customary units.
+    type: BOOLEAN
+
+  HiddenChips:
+    displayName: Hidden Performer Card Chips
+    description: "Comma-separated chips to hide on head-to-head performer cards, e.g. \"measurements, piercings\". Valid: favorite, age, ethnicity, height, weight, eye_color, hair_color, measurements, breasts, scene_count, o_counter, gallery_count, tattoos, piercings, tags. Blank shows all; rating always shows."
+    type: STRING
+
+  HiddenSceneChips:
+    displayName: Hidden Scene Card Chips
+    description: "Comma-separated chips to hide on head-to-head scene cards, e.g. \"video_codec, bit_rate\". Valid: year, duration, resolution, studio, performers, o_counter, play_count, marker_count, gallery_count, groups, size, video_codec, audio_codec, frame_rate, bit_rate, tags. Blank shows all; rating always shows."
+    type: STRING

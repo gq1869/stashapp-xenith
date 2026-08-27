@@ -1,0 +1,3160 @@
+/* ─── Design tokens ────────────────────────────────────────────────────────── */
+:root {
+  --hon-tier-s: #ffb300;
+  --hon-tier-a: #f36;
+  --hon-tier-b: #9d4edd;
+  --hon-tier-c: #00b4d8;
+  --hon-tier-d: #70e000;
+  --hon-tier-f: #8a95a5;
+  --hon-win: #4ade80;
+  --hon-loss: #f87171;
+  --hon-bg: #111;
+  --hon-panel-bg: #1a1a1a;
+  --hon-border: #333;
+
+  /* Leaderboard table cell padding, shared between the CSS td padding below
+     and Leaderboard.jsx's colgroup width calc() — one value so a
+     column sized to its measured ch-width still has room for the actual
+     `td { padding: 8px }` on both sides without the two drifting apart. */
+  --hon-cell-pad: 16px;
+
+  /* Circular control chrome (skip/undo/shuffle) — distinct from --hon-border
+     above, which those buttons don't reuse: they use this bg value as a
+     fill, not a border, so borrowing --hon-border would be semantically
+     wrong and would collide the moment either value needs to move
+     independently. */
+  --hon-control-bg: #333;
+  --hon-control-bg-hover: #3d3d3d;
+  --hon-control-border: #555;
+  --hon-control-border-hover: #666;
+
+  /* dark-mode shadow system */
+  --hon-shadow-border: 0 0 0 1px rgb(255 255 255 / 7%);
+  --hon-shadow-border-hover: 0 0 0 1px rgb(255 255 255 / 13%);
+
+  /* Used by the mobile gender-filter sheet (grep it — nothing else
+     references it). Its dark drop-shadow terms need to be this much
+     stronger than --hon-shadow-modal's own to read at all: the sheet
+     floats over other in-modal content (H2H card, imagery), not the page
+     behind the modal, so there's no darker page backdrop giving it
+     contrast for free — the modal interior it's floating over is already
+     near-black (--hon-bg: #111). */
+  --hon-shadow-lift:
+    0 0 0 1px rgb(255 255 255 / 12%),
+    0 16px 40px rgb(0 0 0 / 55%),
+    0 4px 12px rgb(0 0 0 / 40%);
+
+  /* The 7%/4% black drop-shadow terms this token shipped with render as
+     effectively invisible — the modal has a 45%-black backdrop-filter
+     behind it (see .hon-modal-backdrop below), so a shadow at single-digit
+     alpha reads as no elevation separation at all. Raised toward (not
+     matching — the modal sits over its own dark backdrop already, unlike
+     the sheet's near-black-on-near-black case --hon-shadow-lift's own
+     comment above describes) --hon-shadow-lift's proven values. */
+  --hon-shadow-modal:
+    0 0 0 1px rgb(255 255 255 / 6%),
+    0 8px 32px rgb(0 0 0 / 35%),
+    0 2px 8px rgb(0 0 0 / 25%);
+
+  /* easing */
+  --hon-ease-out: cubic-bezier(0.2, 0, 0, 1);
+
+  /* Keyboard focus ring — see the comment on .hon-mobile-seg-btn:focus-visible
+     below for why this is an inset shadow rather than an outline. */
+  --hon-focus-ring: inset 0 0 0 2px rgb(255 255 255 / 90%);
+
+  /* Card meta chips. Chip height is explicit rather than derived
+     from line-height so a row is exactly --hon-chip-h regardless of the
+     host's root font-size — the fixed line budget below and
+     CardChips.jsx's fit measurement both depend on that being
+     deterministic. */
+  --hon-chip-h: 22px;
+  --hon-chip-gap: 6px;
+  --hon-chip-lines: 3;
+
+  /* Chip colors are per category, not per field: Rating/Favorite share an
+     accent hue, physical traits share one hue, activity counts another,
+     body art another, Tags stay neutral. Scene chips add two more:
+     performer names get their own People hue rather than sharing Art's
+     (they outrank Tags in importance, same reasoning as Art outranking
+     Neutral), and the file-encoding run (size/codecs/frame rate/bit rate)
+     gets a deliberately quiet Tech hue — it's the lowest-value, highest-
+     frequency run, and a loud color there would fight for attention it
+     hasn't earned. Hues are borrowed from the tier tokens above rather than
+     a second palette. Every fg below clears the file's 4.5:1 floor by a
+     wide margin against its own blended fill (over --hon-panel-bg, all
+     land north of 6.5:1) — worth the margin since chip text runs at
+     0.72rem, and small dim text is the repeat offender the notes at
+     :156/:808/:1133 warn about. */
+  --hon-chip-accent-bg: rgb(255 179 0 / 16%);
+  --hon-chip-accent-fg: #ffd479;
+  --hon-chip-physical-bg: rgb(0 180 216 / 16%);
+  --hon-chip-physical-fg: #7fdbf0;
+  --hon-chip-activity-bg: rgb(74 222 128 / 15%);
+  --hon-chip-activity-fg: #86e8ac;
+  --hon-chip-art-bg: rgb(157 78 221 / 20%);
+  --hon-chip-art-fg: #cba6f2;
+  --hon-chip-people-bg: rgb(244 63 94 / 16%);
+  --hon-chip-people-fg: #ff9eb5;
+  --hon-chip-neutral-bg: rgb(255 255 255 / 8%);
+  --hon-chip-neutral-fg: #b3b3b3;
+  --hon-chip-tech-bg: rgb(148 163 184 / 12%);
+  --hon-chip-tech-fg: #a8b3c4;
+}
+
+/* ─── Font smoothing (Principle 8) ────────────────────────────────────────── */
+:root,
+:root * {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ─── Modal ────────────────────────────────────────────────────────────────── */
+.hon-modal {
+  position: fixed;
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  inset: 0;
+}
+
+.hon-modal-backdrop {
+  position: absolute;
+  animation: hon-backdrop-enter 0.2s var(--hon-ease-out) both;
+  backdrop-filter: blur(4px);
+  background: rgb(0 0 0 / 45%);
+  inset: 0;
+}
+
+body.hon-modal-open {
+  overflow: hidden
+}
+
+@keyframes hon-backdrop-enter {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+/* Principle 1: outer 16px so inner elements can be 12px with ~4px clearance
+   Principle 3: layered box-shadow replaces a flat background
+   Principle 5: subtle scale+fade entrance */
+
+/* Sized off the height budget (150vh term), not vw — a vw-driven cap looks
+   right on a 4K 16:9 panel and turns into a letterbox on a 21:9 ultrawide
+   at the same 3840px width. 150vh keeps both converging on a ~3:2 modal
+   envelope instead of diverging on width alone. */
+.hon-modal-content {
+  position: relative;
+  display: flex;
+
+  /* clip, not hidden: identical visual clipping, but doesn't turn this into
+     a programmatically-scrollable container. See the note at .hon-sheet's
+     position: fixed (below) for why that distinction matters — a scrollable
+     ancestor here is exactly what let a focused sheet row drag the whole
+     modal's scrollTop with it. */
+  overflow: clip;
+  width: min(92vw, clamp(1200px, 150vh, 2400px));
+  height: min(90vh, clamp(800px, 88vh, 1500px));
+  max-height: 90vh;
+  flex-direction: column;
+  padding: 24px;
+  border-radius: 16px;
+
+  /* backwards, not both: applies the `from` frame before the animation
+     starts (no flash-of-final-state), but reverts to the element's own
+     base values (no transform, opacity 1 — identical to the `to` frame) once
+     it ends, instead of holding transform: scale(1) at rest forever. A held
+     identity transform still establishes a containing block for fixed-
+     position descendants — see .hon-sheet below. */
+  animation: hon-modal-enter 0.22s var(--hon-ease-out) backwards;
+  background: var(--hon-bg);
+  box-shadow: var(--hon-shadow-modal);
+}
+
+/* Scales modal type on very large displays without ballooning fixed-px
+   controls (.hon-modal-close, .hon-action-btn, .hon-tier-btn stay put —
+   controls shouldn't grow with the panel). */
+@media (width >= 2200px) {
+  .hon-modal-content {
+    font-size: 18px;
+  }
+}
+
+@keyframes hon-modal-enter {
+  from {
+    opacity: 0;
+    transform: scale(0.97) translateY(6px);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+#hon-app-mount {
+  display: flex;
+  min-height: 0;
+  flex: 1;
+  flex-direction: column;
+}
+
+/* Principle 12 + 16: 40×40px hit area, hover state, scale on click */
+.hon-modal-close {
+  position: absolute;
+  z-index: 10;
+  top: 12px;
+  right: 12px;
+  display: flex;
+  width: 40px;
+  height: 40px;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+
+  /* #888, not the old #666 (~3.3:1 on --hon-bg) — WCAG AA needs 4.5:1 for
+     rest-state text; hover already brightens to #fff below. */
+  color: #888;
+  font-size: 1.25rem;
+  transition-duration: 150ms;
+  transition-property: background, color, transform;
+  transition-timing-function: var(--hon-ease-out);
+}
+
+/* Sticky-hover guard: unguarded :hover rules stay "on" after a tap on
+   touch devices until something else is tapped. Gated here (and on every
+   other :hover rule in this file) on hover-capability rather than width,
+   for the same reason as the touch-capability block near the end of this
+   file. */
+@media (hover: hover) {
+  .hon-modal-close:hover {
+    background: rgb(255 255 255 / 8%);
+    color: #fff;
+  }
+}
+
+.hon-modal-close:active {
+  transform: scale(0.96);
+}
+
+.hon-modal-close:focus-visible {
+  box-shadow: var(--hon-focus-ring);
+  outline: 2px solid transparent;
+}
+
+/* ─── Plugin layout ────────────────────────────────────────────────────────── */
+.hon-plugin-layout {
+  display: flex;
+  min-height: 0;
+  flex: 1;
+  gap: 1rem;
+}
+
+/* ─── Sidebar ──────────────────────────────────────────────────────────────── */
+
+/* Principle 3: shadow replaces border for depth */
+.hon-sidebar {
+  width: 200px;
+  max-height: 100%;
+  box-sizing: border-box;
+  flex-shrink: 0;
+  padding: 8px 0;
+  border-radius: 12px;
+  background: var(--hon-panel-bg);
+  box-shadow: var(--hon-shadow-border);
+  overflow-y: auto;
+}
+
+/* display: block plus an explicit width, alongside the border/background/
+   font/text-align resets below, restore how these rows laid out and looked
+   as <div onClick>s before they were made real <button>s. Unlike a <div>, a
+   form control's UA-default sizing is shrink-to-fit (fit-content) even once
+   display is overridden to block — width: auto does NOT resolve to "fill
+   the container" the way it does for a div, so the display-only reset
+   left every row sized to its own text instead of the sidebar's width.
+   Unlike a div's auto width, an explicit width: 100% is measured
+   against the containing block and does NOT get reduced for this rule's
+   own margin, so it's calc()'d down by the margin's 6px+6px here — keep
+   this in sync with the margin below if that value ever changes. */
+.hon-sidebar-row {
+  position: relative;
+  display: block;
+  width: calc(100% - 12px);
+  padding: 7px 12px;
+  border: none;
+
+  /* Principle 1: inner row radius = sidebar 12px - 8px side margin ≈ 6px */
+  border-radius: 6px;
+  margin: 2px 6px;
+  background: none;
+  color: #ccc;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: inherit;
+  text-align: left;
+  transition-duration: 120ms;
+  transition-property: background, box-shadow, color;
+  transition-timing-function: var(--hon-ease-out);
+}
+
+@media (hover: hover) {
+  .hon-sidebar-row:hover {
+    background: #2a2a2a;
+  }
+}
+
+.hon-sidebar-row:focus-visible {
+  box-shadow: var(--hon-focus-ring);
+  outline: 2px solid transparent;
+}
+
+/* Tint + left indicator bar rather than a solid fill — a solid
+   #0d6efd invert left emoji icons (which can't take currentColor)
+   clashing against the new background while the rest of the row turned
+   white around them. The tint keeps text/icon contrast high without
+   requiring anything inside the row to recolor. */
+.hon-sidebar-row.active {
+  background: rgb(13 110 253 / 14%);
+  color: #fff;
+}
+
+.hon-sidebar-row.active::before {
+  position: absolute;
+  top: 20%;
+  left: 0;
+  width: 3px;
+  height: 60%;
+  border-radius: 0 3px 3px 0;
+  background: #0d6efd;
+  content: "";
+}
+
+/* Disabled rows (currently: the Gender Filter row in Scenes mode, since
+   Stash has no scene-level gender field — Sidebar.jsx's genderFilterDisabled)
+   — dimmed, inert, with a trailing hint via .hon-sheet-row-hint (shared with
+   the mobile sheet's own disabled-row styling). */
+.hon-sidebar-row.disabled {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: default;
+  opacity: 0.4;
+}
+
+@media (hover: hover) {
+  .hon-sidebar-row.disabled:hover {
+    background: none;
+  }
+}
+
+/* The single scrollport for both axes on desktop — .hon-stats-table-wrapper
+   deliberately has no overflow of its own here, so the sticky
+   .hon-stats-table th below binds to this instead of a nested, unbounded
+   scroll container. Below 900px, .hon-stats-table-wrapper becomes its own
+   bounded scrollport instead (see @media (width <= 900px) below), so title/
+   filters/distribution above it never move with the table's horizontal
+   scroll — this rule stops being the table's scroll ancestor on mobile. */
+.hon-main-plugin-content {
+  display: flex;
+  overflow: auto;
+  min-width: 0;
+  min-height: 0;
+  flex: 1;
+  flex-direction: column;
+  justify-content: flex-start;
+  gap: inherit;
+  scrollbar-width: none;
+}
+
+/* min-width: 0 for the same reason as .hon-leaderboard below — a flex-item
+   child of .hon-main-plugin-content's column layout otherwise defaults to
+   min-width: auto and can overflow the modal based on its content's
+   min-content width instead of shrinking. */
+.hon-h2h {
+  display: flex;
+  min-width: 0;
+  min-height: 0;
+  flex: 1;
+  flex-direction: row;
+  align-items: stretch;
+  gap: inherit;
+}
+
+/* ─── Sidebar group label ──────────────────────────────────────────────────── */
+.hon-sidebar-group-label {
+  padding: 4px 12px;
+  margin: 10px 6px 0;
+  color: #8a8a8a;
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  user-select: none;
+}
+
+.hon-sidebar-group-label:first-child {
+  margin-top: 0;
+}
+
+/* ─── Expandable sidebar row (reused for both the gender filter and, on
+   mobile, the top-level sidebar accordion) ─────────────────────────────── */
+.hon-sidebar-row.hon-sidebar-expandable {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* Single ▼ glyph, rotated by CSS rather than swapped for ▶ — one
+   glyph state, consistent with .hon-distribution-toggle below, which
+   already did it this way. -90deg points right, same as the ▶ it
+   replaces. */
+.hon-sidebar-expand-icon {
+  display: inline-block;
+  font-size: 0.7rem;
+  opacity: 0.55;
+  transition-duration: 120ms, 220ms;
+  transition-property: opacity, transform;
+  transition-timing-function: var(--hon-ease-out);
+}
+
+.hon-sidebar-row.expanded .hon-sidebar-expand-icon {
+  opacity: 1;
+}
+
+.hon-sidebar-row:not(.expanded) .hon-sidebar-expand-icon,
+.hon-distribution-toggle:not(.expanded) .hon-sidebar-expand-icon {
+  transform: rotate(-90deg);
+}
+
+/* ─── Expanded content / subrows ───────────────────────────────────────────── */
+
+/* display: block + width: calc(100% - 12px) — same reasoning as
+   .hon-sidebar-row above, calc()'d against this rule's own margin. */
+.hon-sidebar-subrow {
+  display: block;
+  width: calc(100% - 12px);
+  padding: 5px 12px 5px 20px;
+  border: none;
+  border-radius: 6px;
+  margin: 1px 6px;
+  background: none;
+  color: #aaa;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.85rem;
+  text-align: left;
+  transition-duration: 120ms;
+  transition-property: background, color;
+  transition-timing-function: var(--hon-ease-out);
+}
+
+@media (hover: hover) {
+  .hon-sidebar-subrow:hover {
+    background: #2a2a2a;
+    color: #fff;
+  }
+}
+
+.hon-sidebar-subrow:focus-visible {
+  box-shadow: var(--hon-focus-ring);
+  outline: 2px solid transparent;
+}
+
+.hon-sidebar-subrow.active {
+  background: rgb(13 110 253 / 10%);
+  color: #fff;
+}
+
+/* ─── Mobile bottom bar & option sheets ───────────────────────────────────────
+   Hidden on desktop/landscape by default (shown, and the desktop panel
+   above hidden, inside @media (width <= 900px) below) — replaces the old
+   "📋 Menu" accordion, which hid all sidebar state behind a toggle and cost
+   two taps per switch. The bar is a normal in-flow flex item (reordered to
+   the bottom via .hon-sidebar's `order`, see the media query), so record
+   type / mode / stats stay readable at rest with zero taps. Record Type,
+   Match Type, and Gender Filter each open the shared OptionSheet.jsx
+   bottom sheet (.hon-sheet*, generalized from the original gender-only
+   sheet) — the one piece that still needs to float above the card, so
+   it's the only part of this group using position: fixed. */
+.hon-mobile-bar {
+  display: none;
+}
+
+.hon-sheet-backdrop,
+.hon-sheet {
+  display: none;
+}
+
+/* ─── VS container ─────────────────────────────────────────────────────────── */
+.hon-vs-container {
+  display: grid;
+  min-width: 0;
+
+  /* flex: 1 is load-bearing: .hon-h2h is a flex row and this is a
+     non-growing flex item by default, so without it the container
+     shrink-to-fits its cards' own intrinsic width — max-width was never
+     the actual constraint, the missing flex-grow was. Confirmed via the
+     device-review capture pass: raising max-width alone left the
+     container pinned at ~590px on a 3840px-wide viewport. */
+  max-width: min(clamp(960px, 62vw, 1800px), 130vh);
+  min-height: 0;
+  flex: 1;
+  margin: 0 auto;
+  gap: 12px;
+  grid-template-columns: 1fr auto 1fr;
+
+  /* Explicit row track (not the implicit auto default) so the card row
+     gets a definite height to hand down to .hon-scene-card and, from
+     there, the native image — see .hon-card-native-wrap below. */
+  grid-template-rows: minmax(0, 1fr);
+}
+
+.hon-vs-divider {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Principle 3: thin gradient line replaces a loud border/text element */
+.hon-vs-divider::before,
+.hon-vs-divider::after {
+  width: 1px;
+  min-height: 32px;
+  flex: 1;
+  background: linear-gradient(to bottom, transparent, rgb(255 255 255 / 12%), transparent);
+  content: "";
+}
+
+.hon-vs-text {
+  color: rgb(255 255 255 / 25%);
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: lowercase;
+}
+
+/* ─── Scene/Performer card ─────────────────────────────────────────────────── */
+
+/* Principle 1: 12px outer radius — inner choose-btn gets 8px
+   Principle 14: explicit transition-property list (never "all")
+
+   No will-change/transform here: nothing in this file ever
+   transforms .hon-scene-card — the only candidate, the tier-accent hover
+   rules below, lives in @media (hover: hover) (inert on touch) and only
+   sets border-color there. SwipeStack (HeadToHead.jsx) is the one place
+   that transforms a card, and it does so on .hon-swipe-card-wrapper, one
+   level up — .hon-scene-card itself just rides that ancestor's transform
+   for free, no will-change of its own needed. */
+.hon-scene-card {
+  position: relative;
+  display: flex;
+  overflow: hidden;
+  min-height: 0;
+  flex-direction: column;
+  border: 2px solid var(--hon-border);
+  border-radius: 12px;
+  background: var(--hon-panel-bg);
+  transition-duration: 200ms, 250ms, 250ms;
+  transition-property: border-color, opacity, filter;
+  transition-timing-function: var(--hon-ease-out);
+}
+
+/* Outcome glow renders on a pseudo-element stacked *above* all card
+   content (z-index 3, above the native-card subtree and delta badge's own
+   z-index bump below) instead of as an inset box-shadow on the card
+   itself. An inset shadow paints below every descendant box, so any
+   transparent seam in the stacked children — image letterboxing, gaps
+   between .hon-card-chips/.hon-choose-btn, a stray border in Stash's
+   native card — cuts a visible gap in it. A single overlay layer can't be
+   sliced by content underneath it, so it's immune to that class of seam
+   regardless of what the native card subtree does. */
+.hon-scene-card::after {
+  position: absolute;
+  z-index: 3;
+
+  /* Deliberately no border-radius (defaults to 0, a square corner) rather
+     than guessing a reduced radius (e.g. 12px outer − 2px border = 10px)
+     to match .hon-scene-card's inner curve by hand. That guess held up in
+     Chromium but produced a visible corner gap in real Safari on iPhone —
+     engines have historically diverged on exactly how much the
+     overflow:hidden clip curve shrinks relative to the outer
+     border-radius at the padding edge. A square (or any radius smaller
+     than the true inner curve, whatever it is on a given engine) is
+     always the *more* generous shape, so overflow:hidden on the card —
+     which clips using the same border-radius/border-width the visible
+     border itself is drawn with — is what actually cuts the corner, and
+     is guaranteed to land exactly on the border's own curve on any
+     engine. The 3rem blur below washes out the difference between a
+     square and a slightly-rounded source shape well before it reaches
+     the clip edge, so there's no visible cost to dropping the radius. */
+  border-radius: 0;
+  content: "";
+  inset: 0;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 250ms var(--hon-ease-out);
+}
+
+.hon-scene-card.hon-outcome-winner {
+  border-color: var(--hon-win);
+  pointer-events: none;
+}
+
+.hon-scene-card.hon-outcome-winner::after {
+  box-shadow: inset 0 0 3rem var(--hon-win);
+  opacity: 1;
+}
+
+.hon-scene-card.hon-outcome-loser {
+  border-color: var(--hon-loss);
+  filter: grayscale(0.4);
+  pointer-events: none;
+}
+
+.hon-scene-card.hon-outcome-loser::after {
+  box-shadow: inset 0 0 3rem var(--hon-loss);
+  opacity: 1;
+}
+
+.hon-scene-card.hon-outcome-draw {
+  border-color: var(--hon-tier-f);
+  filter: grayscale(0.4);
+  pointer-events: none;
+}
+
+.hon-scene-card.hon-outcome-draw::after {
+  box-shadow: inset 0 0 3rem var(--hon-tier-f);
+  opacity: 1;
+}
+
+/* ─── Delta badge ──────────────────────────────────────────────────────────── */
+
+/* Principle 9: tabular-nums prevents number width jitter */
+.hon-delta-badge {
+  position: absolute;
+  z-index: 4;
+  top: 50%;
+  left: 50%;
+  padding: 4px 10px;
+  border-radius: 20px;
+  animation: hon-delta-pop 0.7s var(--hon-ease-out) forwards;
+  font-size: 2rem;
+  font-variant-numeric: tabular-nums;
+  font-weight: bold;
+  transform: translate(-50%, -50%);
+}
+
+.hon-delta-positive {
+  background: var(--hon-win);
+  color: #04250f;
+}
+
+.hon-delta-negative {
+  background: var(--hon-loss);
+  color: #2b0505;
+}
+
+.hon-delta-neutral {
+  background: var(--hon-tier-f);
+  color: #2b1a00;
+}
+
+@keyframes hon-delta-pop {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, 6px) scale(0.8);
+  }
+
+  30% {
+    opacity: 1;
+    transform: translate(-50%, 0) scale(1.15);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translate(-50%, -2px) scale(1.0);
+  }
+}
+
+/* Tier hover border accents */
+@media (hover: hover) {
+  .hon-scene-card.tier-s:hover {
+    border-color: var(--hon-tier-s);
+  }
+
+  .hon-scene-card.tier-a:hover {
+    border-color: var(--hon-tier-a);
+  }
+
+  .hon-scene-card.tier-b:hover {
+    border-color: var(--hon-tier-b);
+  }
+
+  .hon-scene-card.tier-c:hover {
+    border-color: var(--hon-tier-c);
+  }
+
+  .hon-scene-card.tier-d:hover {
+    border-color: var(--hon-tier-d);
+  }
+
+  .hon-scene-card.tier-f:hover {
+    border-color: var(--hon-tier-f);
+  }
+}
+
+/* ─── Native StashApp PerformerCard wrapper ────────────────────────────────── */
+
+/* Renders StashApp's real performer-card component inside our battle card so
+   hover previews, country flag links, and gender rendering stay native.
+   favorite-button, rating-banner, and card-popovers are hidden — Xenith has
+   its own rating/streak/rank overlays layered on top instead. Age is also
+   hidden now that .hon-card-chips (below) carries curated metadata
+   of its own, including its own labeled "Age N" chip — a bare age
+   number reads ambiguously next to the chip row, and the vertical space is
+   the scarcer resource on this card. */
+
+/* flex: 1; min-height: 0 makes this the box the native image ultimately
+   sizes against — .hon-scene-card hands it the card's leftover height
+   (.hon-card-chips below is flex: 0 0 auto and doesn't claim it) and each
+   native descendant below passes that height straight through instead of
+   going auto/content-based, which is what previously broke the chain and
+   forced a hand-tuned max-height on the image itself. */
+.hon-card-native-wrap {
+  position: relative;
+  display: flex;
+  min-height: 0;
+  flex: 1;
+}
+
+.hon-card-native-wrap .thumbnail-section {
+  display: flex;
+  overflow: hidden;
+  min-height: 0;
+  flex: 1;
+}
+
+/* Placed ahead of the more-specific .hon-card-native-wrap ... a:has(...)
+   rule below (stylelint no-descending-specificity) — both target `a`
+   elements but are otherwise unrelated (history drawer vs. card image
+   wrap). */
+.hon-history-opponent a {
+  color: #0d6efd;
+  text-decoration: none;
+}
+
+@media (hover: hover) {
+  .hon-history-opponent a:hover {
+    text-decoration: underline;
+  }
+}
+
+/* The native <a> wrapping the image (classless in performer mode,
+   .scene-card-link in scene mode) is a flex pass-through so its height
+   isn't auto/content-based. min-width: 0 alongside min-height: 0: a flex
+   item's default min-width is auto, which resolves to its content's
+   intrinsic size — for an unconstrained <img> that's the image's native
+   pixel width, so without this the item refuses to shrink below that and
+   overflows .thumbnail-section instead of respecting flex: 1. Caught by
+   the device-review capture pass's checkNoOverflow assertion on scene
+   mode's wide preview images.
+
+   Scoped with :has() rather than a blanket "> a" — Stash's native
+   performer-card markup has a SECOND <a> sibling inside .thumbnail-section
+   (a country-flag badge link, meant to sit as a small absolutely-
+   positioned overlay), and a blanket rule flexed both anchors equally,
+   splitting the row 50/50 and left-aligning the actual photo. Scene mode
+   only has the one <a> so it never hit this.
+
+   align-items/justify-content: center — the performer image below is
+   sized by height with width: auto (not width: 100%), so a
+   less-portrait-than-average photo can compute narrower than the full
+   column; without centering here it hugs the flex default (top-left)
+   instead of sitting centered in the leftover space. */
+.hon-card-native-wrap .thumbnail-section > a:has(.performer-card-image),
+.hon-card-native-wrap .thumbnail-section > a:has(.scene-card-preview) {
+  display: flex;
+  min-width: 0;
+  min-height: 0;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Scene mode only: an extra .scene-card-preview wrapper sits between the
+   <a> and the actual <img>/<video> — same pass-through treatment, same
+   min-width: 0 reasoning as the <a> rule above. */
+.hon-card-native-wrap .scene-card-preview {
+  min-width: 0;
+  min-height: 0;
+  flex: 1;
+}
+
+.hon-card-native-wrap .performer-card {
+  display: flex;
+  width: 100%;
+  min-height: 0;
+  flex: 1;
+  flex-direction: column;
+  border: none;
+  border-radius: 0;
+  margin: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.hon-card-native-wrap .favorite-button,
+.hon-card-native-wrap .rating-banner,
+.hon-card-native-wrap .card-popovers {
+  display: none;
+}
+
+/* Age — same reversible display: none on Stash's own node as the
+   favorite-button/rating-banner/card-popovers hide above; nothing is
+   removed from the DOM. Native age stays hidden even now that the chip row
+   carries a labeled "Age N" chip of its own — the point was never
+   that age is unwanted, just that an unlabeled number next to labeled chips
+   reads ambiguously; the chip is the one age on the card now. */
+/* stylelint-disable-next-line selector-class-pattern */
+.hon-card-native-wrap .performer-card__age {
+  display: none;
+}
+
+/* Separator above .card-popovers, which we hide above — left with nothing
+   to divide, but the native <hr> itself isn't hidden. rgba(0,0,0,0.1) on
+   --hon-panel-bg is invisible at rest, but the outcome glow (below) lights
+   it up as a visible hairline once a match resolves. */
+.hon-card-native-wrap .performer-card > hr,
+.hon-card-native-wrap .scene-card > hr {
+  display: none;
+}
+
+/* Native StashApp SceneCard wrapper — same treatment as performer-card. */
+.hon-card-native-wrap .scene-card {
+  display: flex;
+  width: 100%;
+  min-height: 0;
+  flex: 1;
+  flex-direction: column;
+  border: none;
+  border-radius: 0;
+  margin: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+/* Performer photos are portrait-oriented and height is the scarce
+   resource, so the image is sized BY height —
+   width: auto lets the browser compute it from the image's own intrinsic
+   aspect ratio, which both upscales past the native pixel size (a
+   percentage height can exceed it) and keeps the box tight: the img's own
+   border-box becomes exactly the rendered photo's footprint, so there's
+   no separate oversized box to letterbox. max-width: 100% only clamps the
+   rare landscape-oriented photo from blowing out the column; object-fit:
+   contain is the safety net for exactly that case (prevents squish when
+   max-width clamps width but height stays at 100%) — it doesn't engage in
+   the normal portrait case. */
+.hon-card-native-wrap .performer-card-image {
+  width: auto;
+  max-width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: unset;
+}
+
+/* Scene previews are 16:9 and rarely need much vertical room, so unlike
+   performer images above, these are sized BY width — height: auto keeps
+   the image (and therefore the card, see .hon-vs-container:has(...) below)
+   tight instead of forcing a tall box with letterbox bars top/bottom.
+   object-fit: contain is the same rare-edge-case safety net as above (an
+   unusually tall preview clamped by an ancestor's max-height). */
+.hon-card-native-wrap .scene-card-preview-image,
+.hon-card-native-wrap .scene-card-preview-video {
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+}
+
+/* .hon-scene-card is shared by both battle types, and a battle is never
+   mixed-mode within one .hon-vs-container, so scope by DOM shape (whether
+   this pairing rendered scene markup) rather than adding a JSX className.
+   Without this, the now width-bound (and typically shorter) scene image
+   above still sits inside a card stretched to the grid row's full height,
+   leaving dead space below the image before the title/meta text.
+   align-self: center (not start) — a shorter, content-sized card should
+   sit balanced in the row's vertical center, not pinned to the top. */
+.hon-vs-container:has(.scene-card-preview) .hon-scene-card {
+  align-self: center;
+}
+
+/* stylelint-disable-next-line selector-class-pattern */
+.hon-card-native-wrap .scene-card__details,
+.hon-card-native-wrap .scene-card .card-popovers {
+  display: none;
+}
+
+.hon-card-native-loading {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+  aspect-ratio: 3 / 2;
+
+  /* #888, not #555 (~2.5:1 on --hon-bg) — below AA's 4.5:1 floor */
+  color: #888;
+}
+
+/* Principle 9: tabular-nums on the overlaid rank number */
+.hon-scene-rank {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  padding: 3px 8px;
+  border-radius: 4px;
+  background: rgb(0 0 0 / 80%);
+  color: #fff;
+  font-size: 0.85rem;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ─── Streak badge ─────────────────────────────────────────────────────────── */
+.hon-streak-badge {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  padding: 4px 8px;
+  border-radius: 20px;
+  backdrop-filter: blur(6px);
+  background: rgb(0 0 0 / 60%);
+  box-shadow: 0 1px 4px rgb(0 0 0 / 50%);
+  color: #fff;
+  font-size: 1.6rem;
+  font-weight: 600;
+}
+
+/* ─── Card meta chips ───────────────────────────────────────────── */
+
+/* Both battle types (SceneCard.jsx and PerformerCard.jsx both render
+   CardChips). Height, not max-height: a max-height container still
+   shrinks to content, which would give the pair's two cards different
+   image sizes and shift the Choose button under the cursor. This must stay
+   a true fixed height regardless of how much data an item has —
+   CardChips.jsx measures against this box's own clientHeight (not a
+   hardcoded line count), so --hon-chip-lines above is the single source of
+   truth for the budget. flex: 0 0 auto — the card's leftover height
+   belongs to the native image, not this row. */
+.hon-card-chips {
+  display: flex;
+  overflow: hidden;
+  height: calc(var(--hon-chip-lines) * var(--hon-chip-h) + (var(--hon-chip-lines) - 1) * var(--hon-chip-gap));
+  flex: 0 0 auto;
+  flex-wrap: wrap;
+  align-content: flex-start;
+  margin-bottom: 12px;
+  gap: var(--hon-chip-gap);
+  margin-inline: 15px;
+}
+
+/* Principle 3: shadow, not border. Principle 9: tabular-nums — several
+   chips carry counts, and the pair's two cards sit side by side. Explicit
+   height + line-height: 1 keeps a row exactly --hon-chip-h regardless of
+   the host's root font-size. */
+.hon-chip {
+  display: inline-flex;
+  overflow: hidden;
+  max-width: 100%;
+  height: var(--hon-chip-h);
+  align-items: center;
+  border-radius: 20px;
+  box-shadow: var(--hon-shadow-border);
+  font-size: 0.72rem;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  padding-inline: 8px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.hon-chip-accent {
+  background: var(--hon-chip-accent-bg);
+  color: var(--hon-chip-accent-fg);
+}
+
+.hon-chip-physical {
+  background: var(--hon-chip-physical-bg);
+  color: var(--hon-chip-physical-fg);
+}
+
+.hon-chip-activity {
+  background: var(--hon-chip-activity-bg);
+  color: var(--hon-chip-activity-fg);
+}
+
+.hon-chip-art {
+  background: var(--hon-chip-art-bg);
+  color: var(--hon-chip-art-fg);
+}
+
+.hon-chip-people {
+  background: var(--hon-chip-people-bg);
+  color: var(--hon-chip-people-fg);
+}
+
+.hon-chip-neutral {
+  background: var(--hon-chip-neutral-bg);
+  color: var(--hon-chip-neutral-fg);
+}
+
+.hon-chip-tech {
+  background: var(--hon-chip-tech-bg);
+  color: var(--hon-chip-tech-fg);
+}
+
+/* Static indicator, not a control: no fill, no hover, no pointer. Reads as
+   "there is more", nothing more — the fixed-height row above can never
+   grow to reveal it, unlike Ascension's unbounded field dump. */
+.hon-chip-overflow {
+  background: none;
+  box-shadow: none;
+  color: var(--hon-chip-neutral-fg);
+  font-weight: 600;
+}
+
+/* Principle 1: card is 12px, body has 15px padding → inner btn at 8px
+   Principle 12: scale on click
+
+   border/font-family/font-size reset the <button> UA defaults — no display
+   fix needed here unlike .hon-sidebar-row above: this button is already a
+   flex item of the card's column layout (margin-top: auto relies on it),
+   and flexbox blockifies items regardless of their own display. */
+.hon-choose-btn {
+  padding: 12px;
+  border: none;
+  border-radius: 8px;
+  margin: 15px;
+  margin-top: auto;
+  background: #0d6efd;
+  color: #fff;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: inherit;
+  font-weight: bold;
+  text-align: center;
+  transition-duration: 150ms;
+  transition-property: background, transform;
+  transition-timing-function: var(--hon-ease-out);
+}
+
+.hon-choose-btn:focus-visible {
+  box-shadow: var(--hon-focus-ring);
+  outline: 2px solid transparent;
+}
+
+/* background is already in the transition-property list above, so a hover
+   state costs nothing beyond this declaration — the button previously had
+   no feedback at all until press. */
+@media (hover: hover) {
+  .hon-choose-btn:hover {
+    background: #0b5ed7;
+  }
+}
+
+.hon-choose-btn:active {
+  transform: scale(0.96);
+}
+
+/* ─── Action buttons (skip / undo) ─────────────────────────────────────────── */
+
+/* Principle 12: scale on press; 50px already satisfies ≥40px hit area */
+.hon-actions {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 0.5rem;
+  margin-left: auto;
+  gap: 20px;
+}
+
+.hon-action-group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Shared control chrome for .hon-action-btn (skip/undo, plus Gauntlet's
+   "try another" re-roll which reuses this class directly) and
+   .hon-run-banner-shuffle (Champion's reroll) — one family, two sizes.
+   Rounded square, not a circle: every other control in the file (choose
+   button, run banner, tier/header buttons) is a rounded rect, so a bare
+   circle was the one outlier shape. Radius is size-specific (below), not
+   shared here, since a single radius wouldn't read as "rounded" at both
+   sizes. inline-flex + centering is optical alignment for the SVG icon,
+   which has no text baseline of its own to align to. */
+.hon-action-btn,
+.hon-run-banner-shuffle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--hon-control-border);
+  background: var(--hon-control-bg);
+  color: #fff;
+  cursor: pointer;
+  font-family: inherit;
+  transition-duration: 150ms;
+  transition-property: background, border-color, opacity, transform;
+  transition-timing-function: var(--hon-ease-out);
+}
+
+/* Bare-class sizing must come before the compound :disabled/:focus-visible/
+   :hover/:active selectors below (stylelint no-descending-specificity) —
+   source order, not cascade, since none of these overlap in what property
+   they set. */
+.hon-action-btn {
+  width: 50px;
+  height: 50px;
+  border-radius: 14px;
+  font-size: 1.3rem;
+}
+
+/* .hon-icon (Icons.jsx's SkipIcon/UndoIcon/ShuffleIcon) sizes off
+   the button's own font-size rather than a fixed px value, so it tracks
+   every responsive step (desktop/mobile/coarse-pointer) below without a
+   separate breakpoint of its own. */
+.hon-icon {
+  width: 1.35em;
+  height: 1.35em;
+  flex-shrink: 0;
+}
+
+/* Skip/undo add a text label beside the icon (Gauntlet.jsx's bare-icon
+   "Try another" shuffle re-roll stays untouched, since it doesn't
+   carry this class) — width goes auto and the fixed square opens into a
+   padded pill. Scoped to its own class rather than baked into
+   .hon-action-btn itself so the icon-only case isn't forced wide. */
+.hon-action-btn-labeled {
+  width: auto;
+  padding: 0 16px;
+  gap: 8px;
+}
+
+.hon-action-btn-label {
+  font-family: inherit;
+  font-size: 0.85rem;
+  font-weight: bold;
+}
+
+/* Champion's "shuffle in a different champion" button — shares its chrome
+   with .hon-action-btn via the combined rule above; only sizing differs,
+   scaled down to fit inside the 10px-padded run banner rather than the
+   50px box sized for the match action row below. */
+.hon-run-banner-shuffle {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  line-height: 1;
+}
+
+.hon-action-btn:disabled,
+.hon-run-banner-shuffle:disabled {
+  cursor: not-allowed;
+  opacity: 0.4;
+}
+
+.hon-action-btn:focus-visible,
+.hon-run-banner-shuffle:focus-visible {
+  box-shadow: var(--hon-focus-ring);
+  outline: 2px solid transparent;
+}
+
+@media (hover: hover) {
+  .hon-action-btn:not(:disabled):hover,
+  .hon-run-banner-shuffle:not(:disabled):hover {
+    border-color: var(--hon-control-border-hover);
+    background: var(--hon-control-bg-hover);
+  }
+}
+
+.hon-action-btn:not(:disabled):active,
+.hon-run-banner-shuffle:not(:disabled):active {
+  transform: scale(0.96);
+}
+
+/* ─── Run modes (Gauntlet + Champion) ──────────────────────────────────────────
+   Shared banner shell (count + range spans) above a reused MatchView — see
+   src/components/Gauntlet.jsx and src/components/Champion.jsx. Gauntlet
+   additionally has a preview (pick a challenger) / placement screen either
+   side of its active run; Champion has neither (see Champion.jsx). */
+
+.hon-run {
+  display: flex;
+  min-width: 0;
+  min-height: 0;
+  flex: 1;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.hon-run-banner {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  padding: 10px 16px;
+  border: 1px solid var(--hon-border);
+  border-radius: 10px;
+  background: var(--hon-panel-bg);
+}
+
+.hon-run-banner-count {
+  font-weight: bold;
+}
+
+.hon-run-banner-range {
+  display: flex;
+  align-items: center;
+
+  /* Same #888 as .hon-hint — see the comment there for the AA-contrast reasoning. */
+  color: #888;
+  font-size: 0.85rem;
+  gap: 8px;
+}
+
+/* Preview and placement share the same centered, single-card-width layout
+   — neither sits inside .hon-vs-container, so .hon-scene-card (which relies
+   on that flex parent for its width) needs an explicit constraint here
+   instead. min-height: 0 for the same reason as .hon-h2h above: a flex
+   item of .hon-main-plugin-content's column layout otherwise defaults to
+   min-height: auto and refuses to shrink below its content, which is what
+   turned .hon-main-plugin-content's overflow: auto into a real scrollbar
+   instead of the card just fitting the modal. */
+.hon-gauntlet-preview,
+.hon-gauntlet-placement {
+  display: flex;
+  width: 100%;
+  max-width: 420px;
+  min-height: 0;
+  flex: 1;
+  flex-direction: column;
+  align-self: center;
+  padding: 20px 0;
+  gap: 12px;
+}
+
+/* .hon-scene-card only sizes its native image correctly once something
+   above it hands it a definite height — in the match view that's
+   .hon-vs-container's grid-template-rows: minmax(0, 1fr) (see above); the
+   preview has no such parent, so without this the card falls back to its
+   image's intrinsic size and overflows the modal. flex: 1 against the
+   min-height: 0 column above gives it the same "leftover space after
+   heading + actions" height the match view's grid row provides. Performer
+   mode only — scenes are sized by width, not height (see below), and
+   stretching them here would reintroduce the dead-space-below-the-image
+   gap that .hon-vs-container:has(.scene-card-preview) already avoids for
+   the match view. */
+/* stylelint-disable-next-line no-descending-specificity -- unrelated to
+   .hon-vs-container:has(.scene-card-preview) .hon-scene-card above (preview
+   column vs. match-view grid), no actual cascade conflict. */
+.hon-gauntlet-preview .hon-scene-card {
+  flex: 1;
+}
+
+.hon-gauntlet-preview:has(.scene-card-preview) .hon-scene-card {
+  flex: 0 1 auto;
+  align-self: center;
+}
+
+.hon-gauntlet-preview-heading,
+.hon-gauntlet-placement-heading {
+  color: #888;
+  font-size: 0.9rem;
+  letter-spacing: 0.02em;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.hon-gauntlet-preview-actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+
+.hon-gauntlet-preview-actions .hon-choose-btn {
+  flex: 1;
+  margin: 0;
+}
+
+.hon-gauntlet-placement {
+  align-items: center;
+  text-align: center;
+}
+
+.hon-gauntlet-placement-rank {
+  font-size: 2rem;
+  font-weight: bold;
+}
+
+.hon-gauntlet-placement-basis {
+  color: #888;
+  font-size: 1rem;
+  font-weight: normal;
+}
+
+.hon-gauntlet-placement-tier {
+  color: #aaa;
+  font-size: 1rem;
+}
+
+.hon-gauntlet-placement-leaderboard {
+  color: #888;
+  font-size: 0.85rem;
+}
+
+.hon-gauntlet-placement .hon-choose-btn {
+  width: 100%;
+  margin: 15px 0 0;
+}
+
+/* A gender filter narrowed mid-run can exhaust in-filter probes before the
+   run's own termination rule fires — this replaces what would
+   otherwise be a blank MatchView. */
+.hon-gauntlet-exhausted {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 30px 15px;
+  gap: 15px;
+  text-align: center;
+}
+
+.hon-gauntlet-exhausted-message {
+  color: #aaa;
+  font-size: 1rem;
+}
+
+.hon-gauntlet-exhausted .hon-choose-btn {
+  width: 100%;
+}
+
+/* ─── Keyboard hints ───────────────────────────────────────────────────────── */
+.hon-hint {
+  /* #888 (~5.3:1 on --hon-bg), not #666 (~3.3:1) — below AA's 4.5:1 floor */
+  color: #888;
+  font-size: 0.85rem;
+  text-align: center;
+  white-space: nowrap;
+}
+
+/* ─── States ───────────────────────────────────────────────────────────────── */
+.hon-loading,
+.hon-error {
+  max-width: min(clamp(960px, 62vw, 1800px), 130vh);
+  flex: 1;
+
+  /* .hon-h2h switched from align-items: center to stretch (to let the card
+     image chain flow height down), so these states center themselves now
+     instead of relying on the parent row for cross-axis centering. */
+  align-self: center;
+  padding: 40px;
+  color: #888;
+  text-align: center;
+}
+
+.hon-error {
+  color: #dc3545;
+}
+
+/* ─── Match Log ────────────────────────────────────────────────────────────── */
+
+/* Same width cap/centering as .hon-match-stats-page. -page suffix for the
+   same reason: avoid colliding with a future/adjacent .hon-match-log use.
+   Placed before .hon-stats-table below (Leaderboard section) rather than
+   next to .hon-match-stats-* — stylelint's no-descending-specificity
+   flags .hon-match-log-table th/.hon-match-log-row td appearing after
+   .hon-stats-table td:nth-child(n+3)'s higher-specificity compound
+   selector, even though the two never target the same elements. */
+.hon-match-log-page {
+  width: 100%;
+  min-width: 0;
+  max-width: 1600px;
+  box-sizing: border-box;
+  padding: 10px;
+  margin-inline: auto;
+}
+
+.hon-match-log-empty {
+  padding: 40px;
+  color: #888;
+  text-align: center;
+  text-wrap: pretty;
+}
+
+/* table-layout: fixed so column widths come from the header row once,
+   instead of being recomputed per row — without it, a newly-appended entry
+   with a longer name re-widths every existing row and the whole table
+   visibly jitters as matches come in. */
+.hon-match-log-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+  table-layout: fixed;
+}
+
+.hon-match-log-table th {
+  padding: 8px 10px;
+  border-bottom: 1px solid rgb(255 255 255 / 8%);
+  color: #999;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-align: left;
+  text-transform: uppercase;
+}
+
+/* Explicit widths for the tabular-nums columns (stable content width) so
+   fixed layout has something to size from; Match gets the remainder.
+   Placed after the base th rule above (ascending specificity) to keep
+   stylelint's no-descending-specificity happy. */
+.hon-match-log-table th:nth-child(1) { width: 92px; }
+.hon-match-log-table th:nth-child(2) { width: 72px; }
+.hon-match-log-table th:nth-child(4) { width: 190px; }
+
+.hon-match-log-row td {
+  padding: 8px 10px;
+  border-bottom: 1px solid rgb(255 255 255 / 4%);
+}
+
+.hon-match-log-time {
+  color: #999;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.hon-match-log-chip {
+  padding: 2px 8px;
+  border-radius: 20px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.hon-match-log-chip-win {
+  background: rgb(25 135 84 / 20%);
+  color: #6fd39a;
+}
+
+.hon-match-log-chip-draw {
+  background: rgb(255 255 255 / 8%);
+  color: #999;
+}
+
+/* anywhere, not normal: a pathologically long entity name has to wrap
+   rather than force the fixed-width Match column (and the row) to overflow. */
+.hon-match-log-names {
+  overflow-wrap: anywhere;
+}
+
+.hon-match-log-name {
+  color: #0d6efd;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+@media (hover: hover) {
+  .hon-match-log-name:hover {
+    text-decoration: underline;
+  }
+}
+
+.hon-match-log-ratings {
+  color: #ccc;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Keeps each side's "before → after" pair intact when the cell wraps (see
+   the mobile stack below) — the cell itself allows wrapping so the row can
+   shrink to viewport width, but only at the " / " between the two pairs,
+   never mid-arrow. */
+.hon-match-log-rating-pair {
+  white-space: nowrap;
+}
+
+/* An undone match stays in its original chronological slot (annotated, not
+   removed — see session-log.js's markSessionMatchUndone) so the log reads as
+   an accurate record of the session rather than an append-only vote feed. */
+.hon-match-log-row-undone {
+  opacity: 0.55;
+}
+
+.hon-match-log-row-undone .hon-match-log-name {
+  text-decoration: line-through;
+}
+
+.hon-match-log-row-undone .hon-match-log-ratings {
+  text-decoration: line-through;
+}
+
+.hon-match-log-chip-undone {
+  background: rgb(255 255 255 / 8%);
+  color: #999;
+}
+
+/* ─── Leaderboard ──────────────────────────────────────────────────────────── */
+
+/* Own cap independent of the modal — the modal's width can grow to 2400px
+   on large displays, but a table row that wide is unscannable. */
+.hon-leaderboard {
+  /* width: 100% is load-bearing alongside margin-inline: auto: as a
+     flex-column child of .hon-main-plugin-content, auto cross-axis margins
+     disable flex stretch and fall back to shrink-to-fit content sizing —
+     min-width: 0 alone doesn't help, since shrink-to-fit still sizes to
+     the content's own preferred width (the tier-filter row, table header,
+     etc.), not the container's. width: 100% forces it to fill the
+     available cross-size up to max-width, and the auto margins then only
+     center the remainder once that cap is actually hit. */
+  width: 100%;
+  min-width: 0;
+  max-width: 1600px;
+  box-sizing: border-box;
+  padding: 10px;
+  margin-inline: auto;
+}
+
+.hon-stats-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  margin-bottom: 20px;
+  gap: 16px;
+}
+
+.hon-stats-title {
+  display: flex;
+  align-items: center;
+  margin: 0;
+  color: #fff;
+  font-size: 1.4rem;
+  gap: 8px;
+  text-wrap: balance;
+}
+
+.hon-stats-title-icon {
+  font-size: 1.2em;
+  transform: translateY(1px);
+
+  /* optical: emoji sits high vs. text baseline */
+}
+
+/* Concentric: outer 12px container, inner 8px buttons, 4px padding gap.
+   margin-left: auto pushes it to the trailing edge of .hon-stats-header —
+   it used to inherit that position for free by sitting after the refresh
+   button, which owned the auto-margin; now that the refresh button is
+   gone, the filter carries it directly. */
+.hon-tier-filter {
+  display: flex;
+  padding: 4px;
+  border-radius: 12px;
+  margin-left: auto;
+  background: rgb(255 255 255 / 4%);
+  box-shadow: var(--hon-shadow-border);
+  gap: 4px;
+}
+
+.hon-tier-btn {
+  position: relative;
+  display: inline-flex;
+  min-width: 32px;
+  height: 28px;
+  align-items: center;
+  justify-content: center;
+  padding: 0 8px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: #999;
+  font-size: 0.75rem;
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  transition-duration: 150ms;
+  transition-property: background, color, box-shadow, transform;
+  transition-timing-function: var(--hon-ease-out);
+}
+
+.hon-tier-btn::after {
+  position: absolute;
+  display: block;
+  content: "";
+  inset: -6px 0;
+}
+
+@media (hover: hover) {
+  .hon-tier-btn:hover {
+    background: rgb(255 255 255 / 8%);
+    color: #fff;
+  }
+}
+
+.hon-tier-btn:active {
+  transform: scale(0.96);
+}
+
+.hon-tier-btn:focus-visible {
+  box-shadow: var(--hon-focus-ring);
+  outline: 2px solid transparent;
+}
+
+.hon-tier-btn.active {
+  background: var(--tier-color, #0d6efd);
+  box-shadow: 0 2px 8px rgb(0 0 0 / 40%);
+  color: #fff;
+}
+
+/* Composes the focus ring with .active's own glow — same specificity as a
+   bare :focus-visible rule, so source order (after .active) is what wins. */
+.hon-tier-btn.active:focus-visible {
+  box-shadow: var(--hon-focus-ring), 0 2px 8px rgb(0 0 0 / 40%);
+}
+
+.hon-header-btn {
+  position: relative;
+  display: flex;
+  width: 28px;
+  height: 28px;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 6px;
+  margin-left: auto;
+  background: transparent;
+  color: #ccc;
+  font-size: 0.85rem;
+  transition-duration: 150ms;
+  transition-property: background, transform;
+  transition-timing-function: var(--hon-ease-out);
+}
+
+/* Same ::after hit-area bleed as .hon-tier-btn below — the visible 28px
+   button is under the 40px dense-desktop floor. -6px clears 40×40 with
+   .hon-stats-header's own 16px gap to spare; bumped to -8px (44×44) under
+   coarse-pointer, same as .hon-tier-btn's own touch override, which still
+   clears with 0px to spare. */
+.hon-header-btn::after {
+  position: absolute;
+  display: block;
+  content: "";
+  inset: -6px;
+}
+
+@media (hover: hover) {
+  .hon-header-btn:hover {
+    background: rgb(255 255 255 / 8%);
+  }
+}
+
+.hon-header-btn:active {
+  /* 0.96, not 0.95 — every other press-scale in this file uses 0.96
+     (anything below 0.95 reads as exaggerated per the skill's own rule);
+     this was the one outlier. */
+  transform: scale(0.96);
+}
+
+.hon-header-btn:focus-visible {
+  box-shadow: var(--hon-focus-ring);
+  outline: 2px solid transparent;
+}
+
+/* table-layout: fixed so column widths come from the <colgroup> Leaderboard.jsx
+   renders (computed once from the full ranked set via leaderboard-columns.js)
+   instead of being recomputed per row — without it, paginating to a row
+   with a longer/shorter value in some column re-widths every column and the
+   whole table visibly jitters. Same fix as .hon-match-log-table above, just
+   data-derived widths here instead of hardcoded px. */
+.hon-stats-table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+/* Sticky against whichever ancestor is the real scrollport for the current
+   viewport: .hon-main-plugin-content on desktop (.hon-stats-table-wrapper
+   has no overflow of its own there, on purpose, so it doesn't trap this in a
+   second, unbounded scroll container), or .hon-stats-table-wrapper itself
+   below 900px, where it's bounded and scrolls both axes independently — see
+   @media (width <= 900px). border-collapse
+   means a plain border-bottom belongs to the table, not the cell, so it
+   visibly detaches from a sticky th on scroll; an inset box-shadow is
+   painted by the cell itself and stays put. */
+/* stylelint-disable-next-line no-descending-specificity -- unrelated to
+   .hon-match-log-table th:nth-child(n) above (Match Log column widths vs.
+   Leaderboard's sticky header), no actual cascade conflict. */
+.hon-stats-table th {
+  position: sticky;
+  z-index: 1;
+  top: 0;
+  padding: 0;
+  background: var(--hon-bg); /* opaque — rows must not show through while pinned */
+
+  /* inset shadow = the visible bottom border; the -2px outset one repaints
+     a sliver above the box so a scrolled row can't peek through the
+     subpixel rounding gap "top: 0" can leave mid-scroll (a compositor-frame
+     artifact, not reproducible from a settled scrollTop screenshot). */
+  box-shadow: inset 0 -2px 0 #444, 0 -2px 0 var(--hon-bg);
+  color: #fff;
+  text-align: left;
+}
+
+/* The sort control itself — a real <button> instead of onClick on the <th>
+   so Enter/Space and Tab focus work (previously mouse-only). Fills the th's
+   own box so hit area/hover/sticky-background all stay exactly as before;
+   text-align: inherit overrides the UA default (Chrome centers <button>
+   text) so the th's own left/right alignment (see :nth-child(n+3) below)
+   still applies. */
+.hon-stats-th-btn {
+  width: 100%;
+  padding: 10px 8px;
+  border: none;
+  background: none;
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
+  text-align: inherit;
+}
+
+.hon-stats-th-btn:focus-visible {
+  box-shadow: var(--hon-focus-ring);
+  outline: 2px solid transparent;
+}
+
+/* Opaque blend of --hon-bg (#111) + the original translucent blue — a plain
+   translucent background here would replace the opaque base above instead
+   of layering over it, letting scrolled rows show through the active column. */
+.hon-stats-table th.sort-active {
+  background: #102440;
+}
+
+.hon-stats-table th.sort-asc {
+  color: var(--hon-loss);
+}
+
+.hon-stats-table th.sort-desc {
+  color: var(--hon-win);
+}
+
+/* Principle 9: tabular-nums on all table cells prevents layout shift */
+.hon-stats-table td {
+  padding: 8px;
+  border-bottom: 1px solid #333;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Right align all numeric/stat columns starting from 3rd column */
+.hon-stats-table th:nth-child(n+3),
+.hon-stats-table td:nth-child(n+3) {
+  text-align: right;
+}
+
+@media (hover: hover) {
+  .hon-stats-table tbody tr:hover {
+    background: rgb(255 255 255 / 5%);
+  }
+}
+
+/* Leaderboard pagination footer — only rendered once the pool
+   exceeds one page, so a small library adds no chrome at all.
+   container-type: inline-size so the collapse rules below key off
+   the pager's own available width, not the viewport — the pager can be
+   squeezed by sidebar/panel layout independent of screen size. flex-wrap:
+   nowrap keeps it one row even before/instead of collapsing: the fix is to
+   hide labels, never to reflow to two lines. */
+.hon-leaderboard-pager {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  justify-content: space-between;
+  color: #999;
+  container-type: inline-size;
+  font-size: 0.8rem;
+  gap: 12px;
+  padding-block: 10px;
+}
+
+.hon-pager-range,
+.hon-pager-jump {
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* Text labels are the first thing to go once the pager can't fit on
+   one row. */
+@container (max-width: 460px) {
+  .hon-pager-label {
+    display: none;
+  }
+}
+
+/* Even icons + numbers ("◀ | 1–20 of 1,234 | Page [1] of 12 | ▶") don't fit
+   at the narrowest widths — the range is the redundant half once the page
+   counter already conveys position, so it's what goes next. */
+@container (max-width: 340px) {
+  .hon-pager-range {
+    display: none;
+  }
+}
+
+/* The pager is 0.8rem chrome, not an action button — .hon-icon's default
+   1.35em (sized for the larger skip/undo/shuffle buttons) reads oversized
+   here. */
+.hon-pager-btn .hon-icon {
+  width: 1em;
+  height: 1em;
+}
+
+.hon-pager-btn:disabled {
+  cursor: default;
+  opacity: 0.35;
+}
+
+@media (hover: hover) {
+  .hon-pager-btn:disabled:hover {
+    background: transparent;
+    color: #999;
+  }
+}
+
+.hon-pager-jump-input {
+  /* Fixed, not auto — sized to a comfortable max page-count digit width so
+     the layout doesn't shift as the value changes. Spinners hidden: the
+     arrows would duplicate Prev/Next and crowd a field this small. */
+  width: 3.5ch;
+  padding: 2px 4px;
+  border: 1px solid #444;
+  border-radius: 4px;
+  appearance: textfield;
+  background: rgb(255 255 255 / 4%);
+  color: #fff;
+  font: inherit;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+}
+
+.hon-pager-jump-input::-webkit-inner-spin-button,
+.hon-pager-jump-input::-webkit-outer-spin-button {
+  margin: 0;
+  appearance: none;
+}
+
+/* table-layout: fixed (above) means a long name can no longer wrap the row
+   to fit — it must truncate instead. */
+.hon-stats-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* stylelint-disable-next-line no-descending-specificity -- unrelated to
+   .hon-card-native-wrap .thumbnail-section > a above (leaderboard link vs.
+   card image wrapper); no actual cascade conflict, just a
+   same-tag-selector heuristic. */
+.hon-stats-name a {
+  color: #0d6efd;
+  text-decoration: none;
+}
+
+@media (hover: hover) {
+  .hon-stats-name a:hover {
+    text-decoration: underline;
+  }
+}
+
+.hon-stats-positive {
+  color: var(--hon-win);
+}
+
+.hon-stats-negative {
+  color: var(--hon-loss);
+}
+
+.hon-stats-neutral {
+  color: var(--hon-tier-f);
+}
+
+/* ─── Tier Distribution (Leaderboard) ─────────────────────────────────────── */
+.hon-tier-distribution {
+  padding: 16px;
+  border-radius: 12px;
+  margin-bottom: 20px;
+  background: rgb(255 255 255 / 3%);
+  box-shadow: var(--hon-shadow-border);
+}
+
+/* Doubles as the mobile accordion toggle (.hon-distribution-toggle) — the
+   flex/button-reset declarations below exist only so a <button> renders
+   identically to the plain title div it replaced; the typography above it
+   is unchanged. */
+.hon-tier-distribution-title {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0;
+  border: none;
+  margin-bottom: 12px;
+  background: none;
+  color: #999;
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-align: left;
+  text-transform: uppercase;
+}
+
+/* .hon-sidebar-row.expanded's brighten rule (above) never matches here. */
+.hon-distribution-toggle.expanded .hon-sidebar-expand-icon {
+  opacity: 1;
+}
+
+.hon-tier-bars {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.hon-tier-bar-row {
+  display: grid;
+  align-items: center;
+  animation: hon-tier-row-enter 0.4s var(--hon-ease-out) both;
+  gap: 10px;
+  grid-template-columns: 20px 1fr;
+  opacity: 0;
+  transform: translateY(6px);
+}
+
+@keyframes hon-tier-row-enter {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.hon-tier-bar-label {
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-align: center;
+}
+
+.hon-tier-bar-track {
+  position: relative;
+  display: flex;
+  height: 18px;
+  align-items: center;
+  border-radius: 6px;
+  background: rgb(255 255 255 / 5%);
+}
+
+.hon-tier-bar-fill {
+  min-width: 0;
+  height: 100%;
+  box-sizing: border-box;
+
+  /* Concentric with .hon-tier-bar-track's own 6px (Principle 1) — the fill
+     sits flush against the track with no padding, so equal radii is the
+     correct match; the old 8px was larger than its own container's,
+     visible as a mismatch at the bar tip. */
+  border-radius: 6px;
+  transition: width 700ms var(--hon-ease-out);
+}
+
+.hon-tier-bar-count {
+  position: absolute;
+  top: 50%;
+  font-size: 0.75rem;
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  pointer-events: none;
+  transition: left 700ms var(--hon-ease-out);
+  white-space: nowrap;
+}
+
+/* Inside bar: right-aligned with inset padding */
+.hon-tier-bar-count.is-inside {
+  color: #fff;
+  text-shadow: 0 1px 2px rgb(0 0 0 / 45%);
+  transform: translate(calc(-100% - 8px), -50%);
+}
+
+/* Outside bar: left-aligned past bar tip with dark-mode friendly contrast */
+.hon-tier-bar-count.is-outside {
+  color: rgb(255 255 255 / 85%);
+  text-shadow: none;
+  transform: translate(8px, -50%);
+}
+
+.hon-tier-distribution-total {
+  margin-top: 10px;
+
+  /* #888, not #777 (~4.2:1 on --hon-bg) — just under AA's 4.5:1 floor */
+  color: #888;
+  font-size: 0.75rem;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ─── Match Stats ──────────────────────────────────────────────────────────── */
+
+/* Same width cap/centering rationale as .hon-leaderboard above. Named
+   -page to avoid colliding with the pre-existing .hon-match-stats used by
+   BattleRankBadge.jsx's compact W/L/D segment. */
+.hon-match-stats-page {
+  width: 100%;
+  min-width: 0;
+  max-width: 1600px;
+  box-sizing: border-box;
+  padding: 10px;
+  margin-inline: auto;
+}
+
+.hon-match-stats-scope {
+  padding: 2px 8px;
+  border-radius: 20px;
+  background: rgb(255 255 255 / 6%);
+  color: #999;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+/* Principle 10: pretty avoids orphans in this page's only multi-line body copy */
+.hon-match-stats-empty {
+  padding: 40px;
+  color: #888;
+  text-align: center;
+  text-wrap: pretty;
+}
+
+.hon-match-stats-section {
+  margin-bottom: 24px;
+}
+
+.hon-match-stats-section-title {
+  margin-bottom: 10px;
+  color: #999;
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.hon-match-stats-grid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+}
+
+.hon-match-stats-card {
+  padding: 14px;
+  border-radius: 12px;
+  background: rgb(255 255 255 / 4%);
+  box-shadow: var(--hon-shadow-border);
+}
+
+.hon-match-stats-card-label {
+  margin-bottom: 6px;
+  color: #999;
+  font-size: 0.75rem;
+  text-wrap: pretty;
+}
+
+.hon-match-stats-card-name {
+  display: block;
+  overflow: hidden;
+  color: #0d6efd;
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-decoration: none;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@media (hover: hover) {
+  .hon-match-stats-card-name:hover {
+    text-decoration: underline;
+  }
+}
+
+.hon-match-stats-card-value {
+  color: #fff;
+  font-size: 1.3rem;
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+}
+
+.hon-match-stats-card-empty {
+  /* #888, not #666 (~3.3:1 on --hon-bg) — below AA's 4.5:1 floor */
+  color: #888;
+}
+
+.hon-match-stats-card-sub {
+  margin-top: 4px;
+
+  /* #888, not #777 (~4.2:1) — same fix as the two rules above, same reason */
+  color: #888;
+  font-size: 0.7rem;
+  text-wrap: pretty;
+}
+
+/* ─── Battle rank badge ────────────────────────────────────────────────────── */
+
+/* Principle 3: shadow replaces border; Principle 9: tabular-nums on numbers */
+.hon-battle-rank-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 20px;
+  background: linear-gradient(135deg, #2a2a2a, #1a1a1a);
+
+  /* The 1%/5% terms this shipped with are invisible against the badge's
+     own #2a2a2a→#1a1a1a gradient — same drop-off as --hon-shadow-modal
+     above. Swapped for the file's own --hon-shadow-border token instead of
+     hand-tuning new values, since this badge is the same "border via
+     shadow" case Principle 3 already names for it. */
+  box-shadow: var(--hon-shadow-border);
+  color: #fff;
+  font-size: 0.8rem;
+  font-variant-numeric: tabular-nums;
+  gap: 4px;
+  line-height: 1.2;
+}
+
+.hon-rank-text {
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.hon-compact-badge {
+  position: absolute;
+  z-index: 1;
+  bottom: 1rem;
+  left: 1rem;
+}
+
+/* badge-injector appends the compact badge as a sibling of the native
+   .rating-banner rather than replacing it (a React-owned node), then hides
+   the banner via this class instead of removing it from the DOM. Same
+   reversible-hide pattern as .hon-card-native-wrap .rating-banner above. */
+.thumbnail-section.hon-processed .rating-banner {
+  display: none;
+}
+
+/* Scene cards only: Stash's .scene-interactive-speed-overlay anchors
+   bottom:1rem/left:0.7rem, directly under .hon-compact-badge's own
+   bottom:1rem/left:1rem, so an interactive scene's speed label would sit
+   underneath our badge. Nudged up rather than removed — same reversible,
+   .hon-processed-scoped pattern as the .rating-banner hide above
+   (.thumbnail-section.hon-processed .rating-banner). */
+.video-section.hon-processed .scene-interactive-speed-overlay {
+  bottom: 2.5rem;
+}
+
+.hon-battle-rank-badge-compact {
+  padding: 2px 7px;
+  font-size: 0.72rem;
+  gap: 3px;
+  white-space: nowrap;
+}
+
+.hon-match-stats {
+  display: inline-flex;
+  align-items: center;
+  padding-left: 4px;
+  border-left: 1px solid rgb(255 255 255 / 25%);
+  margin-left: 4px;
+  gap: 4px;
+}
+
+.hon-wins {
+  color: var(--hon-win);
+  font-weight: 600;
+}
+
+.hon-losses {
+  color: var(--hon-loss);
+  font-weight: 600;
+}
+
+.hon-draws {
+  color: var(--hon-tier-f);
+  font-weight: 600;
+}
+
+.hon-tier-chip {
+  padding: 0 5px;
+  border: 1px solid;
+  border-radius: 4px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  line-height: 1.5;
+}
+
+.hon-streak {
+  white-space: nowrap;
+}
+
+.hon-history-toggle {
+  padding: 0;
+  border: none;
+  background: none;
+  color: #9db4d1;
+  cursor: pointer;
+  font-size: inherit;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+@media (hover: hover) {
+  .hon-history-toggle:hover {
+    color: #fff;
+  }
+}
+
+.hon-rank-badge-detail {
+  display: inline-block;
+}
+
+.hon-history-drawer {
+  width: max-content;
+  max-width: 420px;
+  padding: 6px 0;
+  border-radius: 10px;
+  margin-top: 6px;
+  background: linear-gradient(135deg, #2a2a2a, #1a1a1a);
+  box-shadow: var(--hon-shadow-border);
+}
+
+.hon-history-row {
+  display: flex;
+  align-items: center;
+  padding: 4px 10px;
+  font-size: 0.78rem;
+  gap: 8px;
+}
+
+.hon-history-date {
+  color: #999;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.hon-history-chip {
+  padding: 1px 6px;
+  border-radius: 20px;
+  font-size: 0.68rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.hon-history-chip-win {
+  background: rgb(74 222 128 / 18%);
+  color: var(--hon-win);
+}
+
+.hon-history-chip-loss {
+  background: rgb(248 113 113 / 18%);
+  color: var(--hon-loss);
+}
+
+.hon-history-chip-draw {
+  background: rgb(255 255 255 / 8%);
+  color: #999;
+}
+
+.hon-history-opponent {
+  overflow: hidden;
+  flex: 1;
+  color: #ccc;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.hon-history-rating {
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.hon-history-tier-change {
+  margin-left: 3px;
+  font-size: 0.75em;
+}
+
+/* ─── Responsive ───────────────────────────────────────────────────────────── */
+@media (width <= 900px) {
+  .hon-plugin-layout {
+    flex-direction: column;
+  }
+
+  /* order: 2 moves the bar to the bottom of the column, below
+     .hon-main-plugin-content (order: 1 is the default, so it stays put) —
+     record type / mode / stats read at rest with zero taps, in the thumb
+     zone, instead of hiding behind the old top-anchored "Menu" toggle.
+     overflow: visible overrides the base rule's overflow-y: auto (only
+     meaningful for the desktop panel's own tall gender-filter list); the
+     bar has nothing to scroll and the sheet below is position: fixed, so
+     doesn't depend on this at all.
+
+     flex-direction: column, not the flex default (row): .hon-mobile-bar is
+     now this container's only visible child (.hon-sidebar-desktop is
+     hidden below), and a row-flex item with no flex-grow sizes to its own
+     content on the main axis instead of stretching — the bar was shrinking
+     to its content width instead of filling the row. column makes width
+     the cross axis, where align-items: stretch (the flex default) already
+     makes a block-level child fill it, so the bar's negative-margin
+     full-bleed (below) has a normal auto-width box to expand from. */
+  .hon-sidebar {
+    display: flex;
+    overflow: visible;
+    width: 100%;
+    flex-direction: column;
+    flex-shrink: 0;
+    order: 2;
+    padding: 0;
+    background: none;
+    box-shadow: none;
+  }
+
+  .hon-sidebar-desktop {
+    display: none;
+  }
+
+  /* Full-bleed sheet instead of a floating card — avoids side margins and
+     lets the modal use the actual visible viewport height. vh fallback for
+     browsers without dvh support; dvh (where supported) avoids the jump
+     when mobile browser toolbars show/hide mid-scroll. env() returns 0px
+     where unsupported, so no separate fallback branch is needed — without
+     it, the action row can sit under the home indicator and the close
+     button under a notch/Dynamic Island in full-bleed/standalone mode. */
+  .hon-modal-content {
+    width: 100%;
+    max-width: none;
+    height: 100vh;
+    height: 100dvh;
+    max-height: 100vh;
+    max-height: 100dvh;
+    padding: calc(16px + env(safe-area-inset-top)) calc(16px + env(safe-area-inset-right))
+      calc(16px + env(safe-area-inset-bottom)) calc(16px + env(safe-area-inset-left));
+    border-radius: 0;
+  }
+
+  /* 44px touch minimum on mobile (40px is fine for dense desktop); shifted
+     by the same insets as the modal padding so it clears a notch/Dynamic
+     Island in full-bleed/standalone mode. */
+  .hon-modal-close {
+    top: calc(8px + env(safe-area-inset-top));
+    right: calc(8px + env(safe-area-inset-right));
+    width: 44px;
+    height: 44px;
+  }
+
+  /* Reserves real in-flow space at the bottom of the column for the bar
+     below — a normal flex row (order: 2 above), not an overlay, so it
+     never shrinks .hon-main-plugin-content's card underneath it the way
+     the old floating accordion could.
+
+     Negative margins cancel .hon-modal-content's own padding (16px +
+     safe-area, see above) on the three sides the bar touches, so it spans
+     the true viewport edge to edge like a platform tab bar instead of
+     floating as an inset card. The safe-area terms must be canceled too —
+     without them the bar over/under-shoots on a device with non-zero
+     left/right insets (e.g. landscape notch). No border/shadow at the seam
+     with the card above — the two panels share the same background, so a
+     divider there would be pure decoration.
+
+     No explicit width here — this is a block-level flex item of the
+     column-direction .hon-sidebar above (align-items: stretch, the flex
+     default, already fills the cross axis), so its own width stays auto
+     and the negative margins below expand it past the containing block's
+     edges the normal CSS way. An explicit width: 100% here would instead
+     lock the box to .hon-sidebar's own (already-inset) content width and
+     the margins would only shift its position, not enlarge it — the bar
+     would end up flush left but short of the right edge. */
+  .hon-mobile-bar {
+    display: flex;
+    padding: 10px calc(6px + env(safe-area-inset-right)) calc(12px + env(safe-area-inset-bottom))
+      calc(6px + env(safe-area-inset-left));
+    margin: 0 calc(-16px - env(safe-area-inset-right)) calc(-16px - env(safe-area-inset-bottom))
+      calc(-16px - env(safe-area-inset-left));
+    background: var(--hon-panel-bg);
+    gap: 6px;
+  }
+
+  /* Fixed 50/50 split: Record + Match pickers occupy the left half,
+     the tab switcher + gender filter occupy the right half, regardless of
+     either side's content width. flex-basis: 0 (not auto) is what forces
+     an even split — an auto basis would size each half to its own content
+     first, letting a longer picker value ("Performers", "Gauntlet") push
+     the boundary between halves around instead of holding it fixed. */
+  .hon-mobile-bar-half {
+    display: flex;
+    min-width: 0;
+    flex: 1 1 0;
+    gap: 6px;
+  }
+
+  .hon-mobile-seg {
+    display: flex;
+    overflow: hidden;
+    min-width: 0;
+    flex: 1 1 auto;
+    border-radius: 6px;
+    gap: 2px;
+  }
+
+  /* 44px touch minimum, non-overlapping — each segment is its own full-size
+     hit area rather than relying on .hon-tier-btn's ::after bleed trick,
+     since these buttons already fill the available row height. */
+  .hon-mobile-seg-btn,
+  .hon-mobile-filter-btn,
+  .hon-mobile-picker {
+    position: relative;
+    display: flex;
+    min-width: 44px;
+    min-height: 44px;
+    flex: 1;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    border-radius: 6px;
+    background: transparent;
+    color: #999;
+    gap: 1px;
+    transition-duration: 150ms;
+    transition-property: background, color, transform;
+    transition-timing-function: var(--hon-ease-out);
+  }
+
+  .hon-mobile-filter-btn {
+    min-width: 44px;
+    flex: 0 0 auto;
+  }
+
+  /* Pickers (Record Type / Match Type) split the left half's elastic space
+     evenly — min-width: 0 lets .hon-mobile-picker-value's
+     overflow: hidden actually clip instead of forcing the flex item wide. */
+  .hon-mobile-picker {
+    min-width: 0;
+    flex: 1;
+  }
+
+  /* Press feedback — fixed 0.96, never lower, matching every other
+     press-scale value in this file. Static active-state color already
+     carries the "which one is selected" signal; this is purely tactile
+     press acknowledgment, interruptible like any CSS transition. */
+  .hon-mobile-seg-btn:active,
+  .hon-mobile-filter-btn:active,
+  .hon-mobile-picker:active {
+    transform: scale(0.96);
+  }
+
+  /* Inset ring, not an outline or an outset box-shadow: .hon-mobile-seg has
+     overflow: hidden (needed to keep the segmented group's corners concentric
+     with the bar), which clips anything painted outside a child's border box —
+     outline and outset shadow alike. An inset ring paints inside the button's
+     own 6px radius and can't be clipped. The transparent outline is a
+     forced-colors fallback: Windows High Contrast doesn't paint box-shadow,
+     but does force a transparent outline to a visible system color. */
+  .hon-mobile-seg-btn:focus-visible,
+  .hon-mobile-filter-btn:focus-visible,
+  .hon-mobile-picker:focus-visible {
+    box-shadow: var(--hon-focus-ring);
+    outline: 2px solid transparent;
+  }
+
+  /* Tint + top indicator bar rather than a solid fill — same reasoning as
+     .hon-sidebar-row.active above: a solid #0d6efd invert left the
+     seg-icon emoji (which can't take currentColor) clashing against the
+     new background. */
+  .hon-mobile-seg-btn.active,
+  .hon-mobile-filter-btn.active,
+  .hon-mobile-picker.active {
+    background: rgb(13 110 253 / 16%);
+    color: #fff;
+  }
+
+  .hon-mobile-seg-btn.active::before,
+  .hon-mobile-filter-btn.active::before,
+  .hon-mobile-picker.active::before {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    width: 40%;
+    min-width: 16px;
+    height: 2px;
+    border-radius: 0 0 2px 2px;
+    background: #0d6efd;
+    content: "";
+    transform: translateX(-50%);
+  }
+
+  .hon-mobile-picker-caption {
+    color: inherit;
+    font-size: 0.55rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    opacity: 0.65;
+    text-transform: uppercase;
+  }
+
+  .hon-mobile-picker-value {
+    display: flex;
+    max-width: 100%;
+    align-items: center;
+    color: inherit;
+    font-size: 0.7rem;
+    font-weight: 700;
+    gap: 2px;
+  }
+
+  /* text-overflow: ellipsis has no effect on a flex container's own
+     overflow (only on a block/inline box) — .hon-mobile-picker-value above
+     needs to stay flex so the caret sits inline with the label, so the
+     label text gets its own truncating child instead. */
+  .hon-mobile-picker-text {
+    overflow: hidden;
+    min-width: 0;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .hon-mobile-picker-caret {
+    flex-shrink: 0;
+    font-size: 0.6rem;
+    opacity: 0.7;
+  }
+
+  /* Filter dot: always in the DOM once .filtered is set, cross-faded in via
+     opacity/scale rather than popping in with ::after's default
+     display:none-like absence. Positioned against the button's own
+     `position: relative` box (top/right) rather than offset from static
+     flow — anchoring to the box means it can't drift if the button's
+     content or padding ever changes. Visible whenever a gender filter is
+     applied, independent of whether the sheet is currently open (.active). */
+  .hon-mobile-filter-btn::after {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #0d6efd;
+    content: "";
+    opacity: 0;
+    transform: scale(0.5);
+    transition: opacity 150ms var(--hon-ease-out), transform 150ms var(--hon-ease-out);
+  }
+
+  .hon-mobile-filter-btn.filtered:not(.active)::after {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  .hon-mobile-seg-icon {
+    font-size: 1.1rem;
+    line-height: 1;
+  }
+
+  .hon-mobile-seg-label {
+    font-size: 0.62rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+  }
+
+  /* Dims the card/bar behind the sheet — no outside-tap handler needed
+     beyond the click-to-close already wired in Sidebar.jsx. Supersedes the
+     old floating-menu overlay entirely: there's no longer a
+     top-anchored dropdown left to need one. Shared by all three
+     OptionSheet.jsx instances (record type, match type, gender filter). */
+  .hon-sheet-backdrop {
+    position: fixed;
+    z-index: 6;
+    display: block;
+    background: rgb(0 0 0 / 45%);
+    inset: 0;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 220ms var(--hon-ease-out);
+  }
+
+  .hon-sheet-backdrop.open {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  /* position: fixed here resolves against the true viewport —
+     .hon-modal-content deliberately carries no at-rest transform (its
+     entrance animation uses `backwards`, not `both`) so it never becomes a
+     containing block for this. It used to: `both` fill mode held
+     `transform: scale(1)` applied after the animation ended, which still
+     establishes a containing block at identity scale, and combined with
+     .hon-modal-content's own overflow, that scoped this sheet's fixed
+     positioning to it instead of the viewport. On Chromium (not WebKit),
+     focusing a .hon-sheet-row then scrolled .hon-modal-content itself
+     ~320px, stranding the header off-screen — don't reintroduce a
+     held transform on .hon-modal-content without re-checking this.
+     translateY, not the grid-template-rows technique used elsewhere in this
+     file, since the sheet needs to slide in from fully off-screen rather
+     than expand from a zero-height row. */
+  .hon-sheet {
+    position: fixed;
+    z-index: 7;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    display: block;
+    max-height: 70vh;
+    padding: 8px 0 calc(8px + env(safe-area-inset-bottom));
+    border-radius: 12px 12px 0 0;
+    background: var(--hon-panel-bg);
+    box-shadow: var(--hon-shadow-lift);
+    overflow-y: auto;
+
+    /* visibility (not just translateY) so a closed sheet's rows leave the tab
+       order — translateY alone keeps them focusable off-screen. The
+       0s-delayed transition holds the sheet visible for the full 220ms slide
+       out, then flips it hidden; .open below flips it visible immediately. */
+    transform: translateY(100%);
+    transition: transform 220ms var(--hon-ease-out), visibility 0s linear 220ms;
+    visibility: hidden;
+  }
+
+  .hon-sheet.open {
+    transform: translateY(0);
+    transition: transform 220ms var(--hon-ease-out), visibility 0s;
+    visibility: visible;
+  }
+
+  /* Drag region for swipe-to-dismiss (handlers in OptionSheet.jsx) — sized
+     well past the 36px grabber bar alone so the gesture is easy to find,
+     without extending down into the row list's own overflow-y: auto scroll
+     area. touch-action: none stops the browser's default vertical-scroll
+     gesture from competing with the drag on this region specifically; the
+     row list below keeps its native touch-action so it still scrolls
+     normally. */
+  .hon-sheet-handle {
+    touch-action: none;
+  }
+
+  .hon-sheet-grabber {
+    width: 36px;
+    height: 4px;
+    border-radius: 2px;
+    margin: 4px auto 8px;
+    background: rgb(255 255 255 / 20%);
+  }
+
+  .hon-sheet-row {
+    display: flex;
+    width: 100%;
+    min-height: 44px;
+    align-items: center;
+    padding: 0 20px;
+    border: none;
+    background: transparent;
+    color: #ccc;
+    font-size: 0.9rem;
+    gap: 10px;
+    text-align: left;
+    transition: background 120ms var(--hon-ease-out), color 120ms var(--hon-ease-out),
+      transform 120ms var(--hon-ease-out);
+  }
+
+  .hon-sheet-row:active {
+    transform: scale(0.96);
+  }
+
+  .hon-sheet-row:focus-visible {
+    box-shadow: var(--hon-focus-ring);
+    outline: 2px solid transparent;
+  }
+
+  .hon-sheet-row.active {
+    color: #fff;
+  }
+
+  /* Disabled rows (currently: the mobile gender sheet's rows in Scenes
+     mode — Sidebar.jsx maps GENDERS to { disabled: true, hint: "N/A" }
+     there) — dimmed, no press feedback, so they read as inert rather than
+     just a lighter version of a tappable row. */
+  .hon-sheet-row[disabled] {
+    opacity: 0.4;
+  }
+
+  .hon-sheet-row[disabled]:active {
+    transform: none;
+  }
+
+  .hon-sheet-row-hint {
+    margin-left: auto;
+    color: #8a8a8a;
+    font-size: 0.75rem;
+  }
+
+  .hon-sheet-check {
+    width: 1rem;
+    font-size: 1rem;
+    opacity: 0.8;
+  }
+
+  /* 44px touch minimum. Gap between buttons is 4px (.hon-tier-filter), so
+     -6px horizontal bleed (as used vertically) would make neighboring hit
+     areas overlap — -2px keeps them separate. */
+  .hon-tier-btn {
+    min-width: 40px;
+  }
+
+  .hon-tier-btn::after {
+    inset: -8px -2px;
+  }
+
+  .hon-streak-badge {
+    font-size: 1.1rem;
+  }
+
+  /* .hon-leaderboard needs a real, bounded cross-axis height for
+     .hon-stats-table-wrapper below to size a percentage height against — on
+     desktop it's just a flex-column child of .hon-main-plugin-content with
+     no height of its own, which is fine there since that ancestor is the
+     scrollport. Below 900px the wrapper takes over as the table's own
+     scrollport instead, so .hon-leaderboard needs to actually constrain its
+     children's total height rather than growing to fit them. */
+  .hon-leaderboard {
+    display: flex;
+    height: 100%;
+    min-height: 0;
+    flex-direction: column;
+  }
+
+  /* Collapsed by default (Leaderboard.jsx's distributionOpen state) so the
+     ~200px tier-distribution panel doesn't eat a third of a phone screen
+     before the table even gets a chance at height. The title row itself is
+     the toggle now (single card, single heading — see .hon-tier-distribution
+     below); 7px vertical padding rather than a 44px touch minimum, which
+     read oversized for a row this lightweight. */
+  .hon-distribution-toggle {
+    margin-bottom: 0;
+    padding-block: 7px;
+  }
+
+  /* One bordered card instead of a pill-toggle stacked on a second card —
+     small, symmetric padding so a collapsed row reads as a tight single
+     line (no unconditional bottom inset here; that only appears once
+     expanded, via .hon-tier-distribution-total's margin-bottom below).
+     margin-bottom is left at the base rule's 20px (below) rather than
+     overridden here, matching .hon-stats-header's own 20px margin-bottom
+     (above) — an override would create an uneven 20px-above/12px-below
+     rhythm around the card. */
+  .hon-tier-distribution {
+    padding: 4px 16px;
+  }
+
+  /* Hidden entirely on desktop instead of just via display:none on this
+     rule's own selector, since the toggle button only exists in the DOM at
+     all as a mobile affordance — see the desktop override below the closing
+     brace of this media query. */
+  .hon-distribution-content {
+    display: grid;
+    overflow: hidden;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows 220ms var(--hon-ease-out);
+  }
+
+  .hon-distribution-content.expanded {
+    grid-template-rows: 1fr;
+  }
+
+  /* No padding directly on this element — it's the grid item that has to
+     shrink to a true 0px track when collapsed (see .hon-distribution-content
+     above), and padding here would sit in its own border-box regardless of
+     min-height:0, permanently inflating the collapsed row. The open-state
+     insets live one level deeper instead, on .hon-tier-bars/-total below,
+     where overflow:hidden clips them away entirely while collapsed. */
+  .hon-distribution-content-inner {
+    overflow: hidden;
+    min-height: 0;
+  }
+
+  .hon-tier-bars {
+    margin-top: 12px;
+  }
+
+  .hon-tier-distribution-total {
+    margin-bottom: 16px;
+  }
+
+  /* The bounded scrollport for both axes on mobile. The shorthand's first value (x: contain) stops a horizontal swipe
+     at the table's edge from chaining into the browser's back-gesture,
+     while still allowing the horizontal elastic bounce (left/right wobble
+     is fine). The second value (y: none) goes further on the vertical
+     axis: it still contains chaining into the modal scrolling underneath
+     (none is a superset of contain), but also suppresses the vertical
+     rubber-band bounce itself, which read as wobbly at the top edge.
+     Column sizing, padding, and font sizes are all untouched here — this
+     only changes how overflow is contained, not the table's density. */
+  .hon-stats-table-wrapper {
+    overflow: auto;
+    min-height: 0;
+    flex: 1;
+    overscroll-behavior: contain none;
+  }
+
+  /* Pinned below the bounded scrollport above rather than sharing its
+     flex: 1 — the pager is fixed-height chrome, not scrollable content, so
+     it shouldn't be squeezed as .hon-leaderboard's children compete for the
+     phone's limited height. */
+  .hon-leaderboard-pager {
+    flex: none;
+  }
+
+  /* Match Log stacks into cards instead of getting its own horizontal
+     scrollport (contrast .hon-stats-table-wrapper above) — the request was
+     for the page to only ever extend vertically, so overflow is eliminated
+     by wrapping rather than contained by scrolling. Each cell is
+     self-describing (time, Win/Draw chip, "A def. B", ratings), so the
+     header row is dropped rather than repeated as a data-label per cell. */
+  .hon-match-log-table,
+  .hon-match-log-table tbody,
+  .hon-match-log-row {
+    display: block;
+  }
+
+  .hon-match-log-table thead {
+    display: none;
+  }
+
+  .hon-match-log-row {
+    display: grid;
+    padding: 10px 0;
+    border-bottom: 1px solid rgb(255 255 255 / 4%);
+    gap: 2px 8px;
+    grid-template-areas: "time result" "names names" "ratings ratings";
+    grid-template-columns: auto 1fr;
+  }
+
+  .hon-match-log-row td {
+    display: block;
+    padding: 0;
+    border-bottom: none;
+  }
+
+  .hon-match-log-time {
+    grid-area: time;
+  }
+
+  .hon-match-log-result {
+    grid-area: result;
+    justify-self: start;
+  }
+
+  .hon-match-log-names {
+    grid-area: names;
+  }
+
+  /* white-space: normal (overriding the base rule) is what lets the row
+     shrink to viewport width instead of forcing it wide — the
+     .hon-match-log-rating-pair spans (MatchLog.jsx) keep each side's
+     before/after arrow from breaking mid-pair. */
+  .hon-match-log-ratings {
+    font-size: 0.8rem;
+    grid-area: ratings;
+    white-space: normal;
+  }
+}
+
+/* Desktop equivalent of the mobile accordion above: the title row is not
+   clickable and shows no disclosure arrow (Leaderboard.jsx always renders
+   the button, but it's simplest to just neutralize it here rather than
+   branch the JSX), and the content forced open regardless of
+   Leaderboard.jsx's distributionOpen state, so desktop always shows the
+   full distribution panel exactly as it did before this change. */
+@media (width > 900px) {
+  .hon-distribution-toggle {
+    pointer-events: none;
+  }
+
+  .hon-distribution-toggle .hon-sidebar-expand-icon {
+    display: none;
+  }
+
+  .hon-distribution-content {
+    display: block;
+  }
+}
+
+/* Portrait mobile: sidebar becomes a single accordion (reusing the same
+   .hon-sidebar-expandable/.expanded pattern as the nested gender filter),
+   and the VS divider switches from a vertical bar (stacked cards read
+   top-to-bottom) to a horizontal one (left bar — vs — right bar). */
+@media (width <= 900px) and (orientation: portrait) {
+  .hon-h2h {
+    flex: 1;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+
+  .hon-actions {
+    flex-direction: row;
+    margin-left: unset;
+  }
+
+  /* Shrink skip/undo below their 50px desktop size to trim the row's
+     vertical footprint — screen height, not width, is the scarce resource
+     on this stacked mobile layout (cards above, actions row below), so
+     height is what needed to come down; width is free to stay whatever
+     the content needs. ::after bleeds the hit area back out since 40px
+     falls under the 44px touch floor. Icon-only .hon-action-btn instances
+     (Gauntlet's shuffle re-roll) shrink to a 40px square here; the labeled
+     variant below overrides width back to auto since there's no reason to
+     hide the label once only height is constrained. */
+  .hon-action-btn {
+    position: relative;
+    width: 40px;
+    height: 40px;
+    border-radius: 11px;
+    font-size: 1.15rem;
+  }
+
+  .hon-action-btn::after {
+    position: absolute;
+    display: block;
+    content: "";
+    inset: -2px;
+  }
+
+  .hon-action-btn-labeled {
+    width: auto;
+  }
+
+  .hon-vs-container {
+    grid-template-columns: 1fr;
+  }
+
+  /* flex: 1 (not height: auto alone) is load-bearing: every child of this
+     container is position: absolute (removed from flow), so with only
+     height: auto the box's own layout height resolves to 0 — confirmed via
+     getBoundingClientRect on a real 393px iPhone width, not just an edge
+     case. It still painted fine (unclipped overflow lets the abspos
+     children's own content escape the 0-height box), which is why this
+     went unnoticed, but a 0-height box is a degenerate hit-area for the
+     touchstart/move/end handlers bound to this element. flex: 1 inside the
+     .hon-h2h flex column above gives it a real, definite height to lay
+     out against. */
+
+  /* overflow-x: clip: SwipeStack's throw/drag transform lives on
+     .hon-swipe-card-wrapper below, an absolutely-positioned, transformed
+     child — a transformed box still contributes to its ancestors'
+     *scrollable* overflow area even though it's visually removed from
+     flow. Nothing between here and .hon-modal-content's own overflow:
+     clip declared any overflow at all, so a rightward swipe (translated
+     up to +110% of this container's width) grew .hon-main-plugin-content
+     (the nearest ancestor with overflow: auto — its own desktop
+     single-scrollport rule above) into a real horizontal scroll container
+     for the ~250ms the throw was live. This container's own touch-action:
+     pan-y blocks a finger on the card from panning that scroll, but
+     .hon-actions sits right below it with no such restriction — a touch
+     there could drag the whole view sideways mid-throw, which is exactly
+     the bug this fixes. clip, not hidden, for the same reason as
+     .hon-modal-content's own overflow: clip above: identical visual
+     clipping without turning this into a second programmatically-
+     scrollable container. overflow-x only — overflow-y stays visible, and
+     overflow-clip-margin matches .hon-modal-content's mobile padding so
+     the clip edge sits at the true viewport edge rather than this
+     container's own bounds, leaving the throw animation's paint
+     unchanged. Fixed here (the transform's own container) rather than on
+     .hon-main-plugin-content, which needs overflow: auto on both axes for
+     desktop's sticky-header stats table. */
+  .hon-vs-container.hon-swipe-stack {
+    position: relative;
+    width: 100%;
+    flex: 1;
+    overflow-clip-margin: 16px;
+    overflow-x: clip;
+    touch-action: pan-y;
+  }
+
+  /* .hon-swipe-card-wrapper is inset: 0/position: absolute (inline style,
+     HeadToHead.jsx), which gives it a definite height — flex column here
+     (not just a plain block) so a shorter, tight-height card (scene mode,
+     below) centers vertically instead of pinning to the top; align-items
+     defaults to stretch, so the card still gets full *width* either way. */
+  .hon-swipe-card-wrapper {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    user-select: none;
+    will-change: transform;
+  }
+
+  /* .hon-streak-badge's base rule (below) blurs the content behind it via
+     backdrop-filter, which forces a backdrop readback every frame while an
+     ancestor is mid-scale during a card reveal. Same class of cost as the
+     will-change rule above, just a different property — pulled preemptively
+     as a suspect flagged during that reveal-cost investigation, not yet
+     confirmed by a device trace. Background opacity bumped from 60% to 80%
+     to make up the legibility the blur was providing. Scoped to the swipe
+     path only, same as the will-change rule above — the badge elsewhere
+     (leaderboard, desktop cards) keeps its blur. */
+  .hon-swipe-card-wrapper .hon-streak-badge {
+    backdrop-filter: none;
+    background: rgb(0 0 0 / 80%);
+  }
+
+  /* Performer mode only: fill the full swipe height — same split as the
+     desktop .hon-vs-container:has(.scene-card-preview) rule above (height
+     is the scarce resource for a portrait image), just re-expressed here
+     since align-self is inert on this position: absolute chain. Scene
+     mode is left at its natural (already tight, from the rules earlier in
+     this file) auto height, centered by the wrapper's justify-content
+     above instead of stretched full-height with a gap before the meta
+     text. */
+  .hon-vs-container:not(:has(.scene-card-preview)) .hon-swipe-card-wrapper > .hon-scene-card {
+    height: 100%;
+  }
+
+  .hon-vs-divider {
+    width: 100%;
+    flex-direction: row;
+  }
+
+  .hon-vs-divider::before,
+  .hon-vs-divider::after {
+    width: auto;
+    min-width: 32px;
+    height: 1px;
+    min-height: 0;
+    background: linear-gradient(to right, transparent, rgb(255 255 255 / 12%), transparent);
+  }
+
+  /* Hide keyboard hints on mobile since touch users don't use space/Ctrl+Z */
+  .hon-actions .hon-hint {
+    display: none;
+  }
+
+  .hon-tier-filter {
+    flex-grow: 1;
+  }
+
+  .hon-tier-filter .hon-tier-btn {
+    flex: 1;
+  }
+}
+
+/* ─── Touch-capability (any coarse-pointer, no-hover device) ────────────────
+   Every accommodation above this point is gated on viewport width, which
+   conflates "narrow" with "touch" — a landscape tablet (e.g. iPad landscape,
+   ~1194px wide) is neither narrow nor portrait, so it falls through both
+   blocks above and renders as plain desktop on a device with no mouse and
+   no keyboard. This block keys on actual input capability instead, so any
+   touch device gets it regardless of width — including ones the width
+   heuristic misses (e.g. a touchscreen laptop). Confirmed against the
+   iPad Pro 11 landscape Playwright preset: reports hover:none/pointer:coarse
+   as expected under Chromium emulation. */
+@media (hover: none) and (pointer: coarse) {
+  /* 44px touch minimum — same values as the width <= 900px block above,
+     duplicated rather than merged: the two conditions are independent (a
+     portrait phone matches both; a landscape tablet only matches this
+     one), and CSS tolerates the redundant overlap fine. */
+  .hon-modal-close {
+    width: 44px;
+    height: 44px;
+  }
+
+  .hon-tier-btn {
+    min-width: 40px;
+  }
+
+  .hon-tier-btn::after {
+    inset: -8px -2px;
+  }
+
+  .hon-header-btn::after {
+    inset: -8px;
+  }
+
+  /* Same shrink as the width <= 900px block above (identical values,
+     duplicated per this block's own convention above). */
+  .hon-action-btn {
+    position: relative;
+    width: 40px;
+    height: 40px;
+    border-radius: 11px;
+    font-size: 1.15rem;
+  }
+
+  .hon-action-btn::after {
+    position: absolute;
+    display: block;
+    content: "";
+    inset: -2px;
+  }
+
+  .hon-action-btn-labeled {
+    width: auto;
+  }
+
+  /* Hide keyboard hints — a touch-only device has no Space/Ctrl+Z to press.
+     Trade-off, accepted: an iPad with a Magic Keyboard also reports
+     hover:none/pointer:coarse and would lose the hint despite having keys.
+     The bare-tablet case dominates, and a wrong instruction is worse than
+     a missing one. */
+  .hon-actions .hon-hint {
+    display: none;
+  }
+}
+
+/* ─── Reduced motion ─────────────────────────────────────────────────────────
+   Eight animations/transitions in this file run unconditionally today: the
+   modal backdrop/content enter, the delta-pop, the tier-row stagger, the
+   tier-bar width/left fill, the mobile sheet slide, the distribution
+   accordion, and (in HeadToHead.jsx, not reachable from here) SwipeStack's
+   inline throw transition — see the matchMedia gate there.
+
+   transition-delay is deliberately left alone: .hon-sheet's
+   `visibility 0s linear 220ms` (above) is what keeps a closed sheet's rows
+   out of the tab order, not decoration — zeroing it here would flip
+   visibility instantly on open/close instead of holding it through the
+   (now near-instant) transform transition, which is still correct, but
+   forcing animation-duration to ~0 does that job already without touching
+   delay and risking a future transition that actually needs one. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  /* The delta-pop's scale bounce (0.8 → 1.15 → 1.0) is the single most
+     attention-grabbing motion in the plugin — a badge popping out of the
+     center of the card the instant a match resolves. Reduced-motion still
+     needs the number to appear (it's the actual result, not decoration),
+     so this swaps the keyframe animation for a plain opacity fade instead
+     of just speeding the existing one up to imperceptible. */
+  .hon-delta-badge {
+    animation: none;
+    opacity: 1;
+    transform: translate(-50%, -50%);
+    transition: opacity 150ms linear;
+  }
+}

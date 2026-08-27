@@ -1,0 +1,19 @@
+{
+  "name": "xenith-qa",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test:unit": "vitest run unit",
+    "test:backend": "uv run --project .. pytest backend/test_tasks.py -v",
+    "test:e2e": "playwright test -c e2e/playwright.config.js",
+    "test:e2e:diagnose": "playwright test -c e2e/playwright.config.js e2e/diagnose.spec.js",
+    "test": "npm run test:unit && npm run test:backend"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.48.0",
+    "vitest": "^4.1.10"
+  },
+  "allowScripts": {
+    "fsevents@2.3.2": true
+  }
+}

@@ -1,0 +1,33 @@
+{
+  "name": "stashapp-xenith",
+  "version": "3.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "vite build",
+    "build:dev": "vite build --mode development",
+    "watch": "vite build --watch --mode development",
+    "analyze": "vite-bundle-visualizer",
+    "lint": "npm run lint:js && npm run lint:css",
+    "lint:js": "eslint . -c .config/eslint.config.mjs",
+    "lint:css": "stylelint \"**/*.css\" --config .config/stylelint.config.mjs --config-basedir .",
+    "lint:css:fix": "stylelint \"**/*.css\" --config .config/stylelint.config.mjs --config-basedir . --fix",
+    "lint:fix": "eslint . -c .config/eslint.config.mjs --fix && npm run lint:css:fix",
+    "typecheck": "tsc",
+    "test": "npm run lint && npm run typecheck"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.5",
+    "@types/react": "^17.0.93",
+    "eslint": "^9.39.5",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "globals": "^14.0.0",
+    "stylelint": "^16.26.1",
+    "stylelint-config-idiomatic-order": "^10.0.0",
+    "stylelint-config-standard": "^39.0.0",
+    "typescript": "^7.0.2",
+    "vite": "^8.2.1",
+    "vite-bundle-visualizer": "^1.2.1"
+  }
+}
