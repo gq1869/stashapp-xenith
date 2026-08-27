@@ -10,15 +10,15 @@ This is Xenith's first public release.
 
 ### Why 3.0.0
 
-Xenith is part of a lineage of Elo/head-to-head ranking plugins for Stash: [HotOrNot](https://github.com/lowgrade12/hot-or-not) came first, then [Ascension](https://github.com/Servbot91/Sakotos-Stash-Repo/tree/main/plugins/Ascension) raised the bar on features. Xenith is the third generation — same lineage, rebuilt with a sharper focus on the rating math and a leaner, modular implementation. The size difference shows up directly in what ships:
+Xenith is part of a lineage of Elo/head-to-head ranking plugins for Stash — [HotOrNot](https://github.com/lowgrade12/hot-or-not) came first, and later plugins in the family built on those ideas. Xenith is a from-scratch rebuild in that same spirit, with its own take on the rating math and a modular implementation (~9,600 lines across 38 source files, an 81.5 KB JS + 34.8 KB CSS minified bundle).
 
-| | Xenith | Ascension |
-| --- | --- | --- |
-| Frontend bundle | 81.5 KB JS + 34.8 KB CSS (minified) | 483 KB JS + 116 KB CSS (unminified) |
-| Frontend source | ~9,600 lines across 38 files | ~18,000 lines across 3 files |
-| Backend | ~460 lines Python | ~600 lines Python |
+A few of the underlying design choices:
 
-(Xenith's bundle figures are minified; Ascension's aren't, so the payload gap overstates things somewhat — the source line/file-count comparison is the fairer read on maintainability.)
+- **New items start neutral.** An unrated item seeds at 50/100 — the middle of the scale — so its first few matches can move it in either direction rather than only upward.
+- **K-factor scales with library size.** The K-factor bounds grow with pool size, rather than staying fixed regardless of whether the library has 100 items or 100,000.
+- **Gauntlet mode is a Bayesian posterior over ladder position, not a climb/fall bracket.** Every match is treated as evidence updating a posterior, so one unlucky early loss doesn't cap the final placement.
+- **One unified attenuation formula.** A single non-linear attenuation applies symmetrically to both sides of an upset, rather than several separate multipliers/dampeners layered on top of each other — attenuation itself can't create net rating inflation across the pool.
+- **Fixed, calibrated tier bounds.** Tier cutoffs are calibrated once against the rating math (via Monte Carlo simulation) and held constant, so the same rating always maps to the same tier regardless of how the library's distribution shifts over time.
 
 ### What's in it
 
