@@ -22,7 +22,7 @@
     "eslint": "^9.39.5",
     "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-react-hooks": "^7.1.1",
-    "globals": "^14.0.0",
+    "globals": "^17.11.0",
     "stylelint": "^16.26.1",
     "stylelint-config-idiomatic-order": "^10.0.0",
     "stylelint-config-standard": "^39.0.0",
