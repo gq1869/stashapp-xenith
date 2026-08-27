@@ -6,8 +6,8 @@ Xenith is maintained by a single developer with no backport branches. Only the l
 
 | Version               | Supported |
 | ---------------------- | --------- |
-| 2.5.x (latest release) | ✅        |
-| < 2.5                  | ❌        |
+| 3.0.x (latest release) | ✅        |
+| < 3.0                  | ❌        |
 
 Runtime requirements: Stash v0.31+, Python ≥ 3.11.
 

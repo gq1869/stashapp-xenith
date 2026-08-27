@@ -21,9 +21,27 @@ Snapshot export/import (for backing up and restoring rating history) is availabl
 
 ## Installation
 
-1. Download a Release zip from this repo's Releases page (ships a prebuilt `dist/`, no `npm run build` needed) or clone the repo, into your Stash `plugins/` directory
-2. Install backend deps: `pip install -r requirements.txt`
-3. If you cloned instead of using a Release zip, build the frontend bundle: `npm install && npm run build`
+**Prerequisite, all paths:** Xenith's backend needs `stashapp-tools`. Stash doesn't install Python deps for you, so run `pip install -r requirements.txt` (or `pip install stashapp-tools`) once, regardless of which install method you use below.
+
+### A. In-app (recommended)
+
+1. Settings → Plugins → Available Plugins → Add Source, and add:
+   `https://gq1869.github.io/stashapp-xenith/stable/index.yml`
+2. Find Xenith under Available Plugins and click Install — this installs a prebuilt bundle straight into your Stash `plugins/` directory, no manual build step
+3. Install backend deps (see prerequisite above)
+4. Future updates show up in the same Available Plugins list
+
+### B. Release zip
+
+1. Download `xenith.zip` from this repo's Releases page (ships a prebuilt `dist/`) and unzip it into your Stash `plugins/` directory
+2. Install backend deps (see prerequisite above)
+3. Reload plugins in Stash (Settings → Plugins → Reload Plugins)
+
+### C. Clone + build (development)
+
+1. Clone this repo into your Stash `plugins/` directory
+2. Install backend deps (see prerequisite above)
+3. `npm install && npm run build` — `dist/` is gitignored, so this step is required when cloning
 4. Reload plugins in Stash (Settings → Plugins → Reload Plugins)
 
 ## Usage
