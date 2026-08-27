@@ -3,7 +3,7 @@ updates:
   - package-ecosystem: "npm"
     directory: "/"
     schedule:
-      interval: "weekly"
+      interval: "monthly"
     # Xenith is a Stash plugin: React itself comes from the Stash host at
     # runtime (currently React 17), not from this package. @types/react must
     # track that runtime version, not npm's latest major.
@@ -11,6 +11,25 @@ updates:
       - dependency-name: "@types/react"
         update-types: ["version-update:semver-major"]
     groups:
+      # eslint/stylelint plugins and configs are peer-dependency coupled to
+      # their core package. A major bump proposed alone (e.g. eslint 9->10
+      # without eslint-plugin-react, or stylelint-config-standard 39->40
+      # without stylelint 16->17) fails `npm ci` with ERESOLVE. Grouping these
+      # families (patch/minor/major) makes dependabot bump them together so
+      # the PR either resolves cleanly or fails as one visible unit instead of
+      # landing as unmergeable half-changes. Declared before the catch-all
+      # dev-dependencies group below, since dependabot assigns each dependency
+      # to the first group it matches.
+      eslint:
+        patterns:
+          - "eslint"
+          - "@eslint/*"
+          - "eslint-plugin-*"
+      stylelint:
+        patterns:
+          - "stylelint"
+          - "stylelint-config-*"
+          - "stylelint-order"
       dev-dependencies:
         dependency-type: "development"
         update-types:
@@ -20,7 +39,7 @@ updates:
   - package-ecosystem: "npm"
     directory: "/qa"
     schedule:
-      interval: "weekly"
+      interval: "monthly"
     groups:
       dev-dependencies:
         dependency-type: "development"
@@ -31,9 +50,9 @@ updates:
   - package-ecosystem: "pip"
     directory: "/"
     schedule:
-      interval: "weekly"
+      interval: "monthly"
 
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
-      interval: "weekly"
+      interval: "monthly"
