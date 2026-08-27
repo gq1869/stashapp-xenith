@@ -183,7 +183,7 @@ Every probe is evidence that reshapes belief, never a commit that discards half 
 
 **Termination.** A run is $\ge 10$ and $\le 14$ matches (`MIN_MATCHES`/`MAX_MATCHES`, `src/gauntlet.js`) — long enough to be a real placement search regardless of how settled the challenger's prior rating was, short enough to stay a session-scale activity. It ends at the cap, or once past the minimum when the posterior's 80% credible interval has narrowed to $\le \max(5, \lceil L \times 0.02 \rceil)$ ladder positions, where $L$ is ladder size.
 
-**No mode-specific rating math.** Consistent with §3.2's "one dampening mechanism" and §3.3's "shared factor, not a second layer" — Gauntlet introduces no K-factor multiplier and no streak dampener of its own (unlike, e.g., Ascension's Champion mode stacking a flat 0.5x K on top of a separate streak penalty — see §3.9 below for why Xenith's own Champion mode needs neither). The challenger's own K already decays across the run via the existing sigmoid (§3.2) as its match count climbs during the run itself.
+**No mode-specific rating math.** Consistent with §3.2's "one dampening mechanism" and §3.3's "shared factor, not a second layer" — Gauntlet introduces no K-factor multiplier and no streak dampener of its own (see §3.9 below for why Xenith's Champion mode needs neither, either). The challenger's own K already decays across the run via the existing sigmoid (§3.2) as its match count climbs during the run itself.
 
 **Both battle types.** Gauntlet plays on both performers and scenes — the ladder and challenger pool are just `rank-cache.js`'s per-battle-type ranked ordering, so the same placement math above applies unmodified to either. The termination rule's target width scales with ladder size ($\max(5, \lceil L \times 0.02 \rceil)$ above), so a run against a much larger scenes library places more coarsely in absolute rank than the same run would on a smaller performers pool — expected behavior, not a regression.
 
@@ -195,7 +195,7 @@ The ladder is otherwise **frozen for the run's whole duration**, same as the unf
 
 ### 3.9 Champion Mode: Volatility Reduction Without a Mode-Scoped K-Factor
 
-Champion mode is the third and simplest of the family's ladder-style modes: an incumbent stays on the stage defending against new challengers as long as it keeps winning, with no falling-placement phase — that's Gauntlet-only (§3.8). Every reference implementation in the family (§1) pairs this with a hand-tuned rating dampener: HotOrNotV2 documents a flat "0.5x K-factor (half the rating change of Swiss mode)"; Ascension stacks a *second*, streak-based penalty on top of that (dampens at 5+ wins, reduces the K-multiplier further at 10+). Xenith ships Champion with `src/elo.js` untouched.
+Champion mode is the third and simplest of the family's ladder-style modes: an incumbent stays on the stage defending against new challengers as long as it keeps winning, with no falling-placement phase — that's Gauntlet-only (§3.8). A hand-tuned rating dampener for this mode is a common pattern in the family (§1) — e.g. HotOrNotV2 documents a flat "0.5x K-factor (half the rating change of Swiss mode)." Xenith ships Champion with `src/elo.js` untouched instead.
 
 **Why the family's dampener is redundant here.** The family's `0.5x` compensates for a linear or wide-scale expected-score curve, where a champion with a large lead still gains meaningfully per defense. Xenith's D=35 (§2.1) already collapses that gain as a function of the lead:
 
@@ -205,7 +205,7 @@ Champion mode is the third and simplest of the family's ladder-style modes: an i
 | +25 | 0.84 | $0.16K$ |
 | +40 | 0.93 | $0.07K \approx$ 1–2 pts |
 
-The marginal gain of the Nth defense self-extinguishes as the lead grows — the same effect the family's `0.5x` bolts on by hand, here derived from the scale factor rather than tuned. On top of this, every defense increments the champion's own match count, decaying its K toward $K_{\text{min}}$ via §3.2's sigmoid — a second, independent dampener already active before any mode-specific one would be added. Per §3.2/§3.3's "one mechanism, not two interacting ones," a third (mode-scoped) dampener here would repeat Ascension's stacking mistake rather than avoid it.
+The marginal gain of the Nth defense self-extinguishes as the lead grows — the same effect the family's `0.5x` bolts on by hand, here derived from the scale factor rather than tuned. On top of this, every defense increments the champion's own match count, decaying its K toward $K_{\text{min}}$ via §3.2's sigmoid — a second, independent dampener already active before any mode-specific one would be added. Per §3.2/§3.3's "one mechanism, not two interacting ones," a third (mode-scoped) dampener here would stack redundantly on top of both rather than add anything.
 
 **Inflation check.** A champion beating a fresh high-K challenger is net-*deflationary* — `loserLoss` uses the challenger's larger K against the same $1-E$. A challenger upsetting the champion is net-inflationary, but that is §4.1's deliberate new-item velocity, already attenuated symmetrically by §3.3's loss mitigation once the gap exceeds 15. Neither direction needs a mode-specific correction.
 
