@@ -1,0 +1,114 @@
+name: Bug report
+description: Something in Xenith isn't working as expected
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: Use a plain, descriptive title — no `bug:`/`stub:`/`WIP:` prefix.
+
+  - type: textarea
+    id: description
+    attributes:
+      label: What happened?
+      description: What did you expect instead, and what actually happened?
+    validations:
+      required: true
+
+  - type: textarea
+    id: repro
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1.
+        2.
+        3.
+    validations:
+      required: true
+
+  - type: dropdown
+    id: battle-type
+    attributes:
+      label: Battle type
+      description: Most of Xenith is namespaced by battle type — this narrows down which code path is involved.
+      options:
+        - Performers
+        - Scenes
+        - Both
+        - Not applicable
+    validations:
+      required: true
+
+  - type: dropdown
+    id: match-mode
+    attributes:
+      label: Match mode
+      options:
+        - Head-to-Head (Swiss)
+        - Gauntlet
+        - Champion
+        - Not applicable
+    validations:
+      required: false
+
+  - type: dropdown
+    id: device
+    attributes:
+      label: Device
+      options:
+        - Desktop
+        - Mobile portrait
+        - Mobile landscape
+        - Tablet
+    validations:
+      required: false
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area (best guess)
+      description: >
+        A hint for triage, not binding — labels get set by a maintainer regardless.
+      options:
+        - "scoring — Elo math, K-factor, protections, composite score, tiers"
+        - "matchmaking — pair selection, weighting, cooldowns, cross-tier events"
+        - "interface — React components, styles, layout, motion"
+        - "stash-integration — GraphQL calls, native-tree mounting, badge/tooltip injection"
+        - "plugin-tasks — Python exec entry, wipe/reset/snapshot tasks, manifest"
+        - "qa — unit, backend, e2e suites, calibration scripts"
+        - "build — Vite bundling, CI workflows, release, dependency plumbing"
+        - Not sure
+    validations:
+      required: false
+
+  - type: input
+    id: xenith-version
+    attributes:
+      label: Xenith version
+      placeholder: e.g. 3.0.0
+    validations:
+      required: true
+
+  - type: input
+    id: stash-version
+    attributes:
+      label: Stash version
+      placeholder: e.g. v0.31.0
+    validations:
+      required: true
+
+  - type: input
+    id: browser
+    attributes:
+      label: Browser / OS
+      placeholder: e.g. Chrome 128 on macOS 15
+    validations:
+      required: false
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant logs or console output
+      description: Browser devtools console, and/or Stash's own log (Settings → Logs) — Xenith writes match lines there.
+      render: shell
+    validations:
+      required: false
