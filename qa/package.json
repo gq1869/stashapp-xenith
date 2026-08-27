@@ -10,8 +10,8 @@
     "test": "npm run test:unit && npm run test:backend"
   },
   "devDependencies": {
-    "@playwright/test": "^1.48.0",
-    "vitest": "^4.1.10"
+    "@playwright/test": "^1.62.1",
+    "vitest": "^4.1.11"
   },
   "allowScripts": {
     "fsevents@2.3.2": true
