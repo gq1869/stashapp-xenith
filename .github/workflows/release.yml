@@ -37,4 +37,8 @@ jobs:
           if [[ "${GITHUB_REF_NAME}" == *-* ]]; then
             PRERELEASE_FLAG="--prerelease"
           fi
-          gh release create "${GITHUB_REF_NAME}" xenith.zip --generate-notes $PRERELEASE_FLAG
+          if bash .github/scripts/extract-notes.sh "${GITHUB_REF_NAME}" notes.md; then
+            gh release create "${GITHUB_REF_NAME}" xenith.zip --notes-file notes.md $PRERELEASE_FLAG
+          else
+            gh release create "${GITHUB_REF_NAME}" xenith.zip --generate-notes $PRERELEASE_FLAG
+          fi
