@@ -2,6 +2,13 @@ name: Feature request
 description: Suggest an idea or improvement for Xenith
 labels: ["enhancement"]
 body:
+  - type: markdown
+    attributes:
+      value: |
+        Use a plain, descriptive title — no `stub:`/`WIP:` prefix.
+
+        Xenith aims to be tight and performant, not feature-heavy — ideas borrowed from comparable plugins get reimplemented leaner, not copied wholesale.
+
   - type: textarea
     id: problem
     attributes:
@@ -19,8 +26,46 @@ body:
       required: false
 
   - type: textarea
+    id: scope
+    attributes:
+      label: Scope / constraints
+      description: Known constraints, files likely involved, or open questions to confirm before a fix is picked.
+    validations:
+      required: false
+
+  - type: textarea
     id: alternatives
     attributes:
       label: Alternatives considered
+    validations:
+      required: false
+
+  - type: dropdown
+    id: battle-type
+    attributes:
+      label: Battle type
+      options:
+        - Performers
+        - Scenes
+        - Both
+        - Not applicable
+    validations:
+      required: false
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area (best guess)
+      description: >
+        A hint for triage, not binding — labels get set by a maintainer regardless.
+      options:
+        - "scoring — Elo math, K-factor, protections, composite score, tiers"
+        - "matchmaking — pair selection, weighting, cooldowns, cross-tier events"
+        - "interface — React components, styles, layout, motion"
+        - "stash-integration — GraphQL calls, native-tree mounting, badge/tooltip injection"
+        - "plugin-tasks — Python exec entry, wipe/reset/snapshot tasks, manifest"
+        - "qa — unit, backend, e2e suites, calibration scripts"
+        - "build — Vite bundling, CI workflows, release, dependency plumbing"
+        - Not sure
     validations:
       required: false
