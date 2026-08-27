@@ -4,6 +4,12 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
+    # Xenith is a Stash plugin: React itself comes from the Stash host at
+    # runtime (currently React 17), not from this package. @types/react must
+    # track that runtime version, not npm's latest major.
+    ignore:
+      - dependency-name: "@types/react"
+        update-types: ["version-update:semver-major"]
     groups:
       dev-dependencies:
         dependency-type: "development"
