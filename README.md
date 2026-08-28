@@ -85,6 +85,8 @@ Click the Xenith button in the nav bar to open the ranking modal. Choose a battl
 - **Hidden Performer Card Chips** — comma-separated list of h2h performer card chips to hide (e.g. `measurements, piercings`); blank shows all
 - **Hidden Scene Card Chips** — comma-separated list of h2h scene card chips to hide (e.g. `video_codec, bit_rate`); blank shows all
 
+`XENITH_STASH_API_KEY` — not a plugin setting, an optional environment variable for the Stash server/container. Only needed on an auth-enabled Stash instance whose session cookie goes stale; when set, Xenith's maintenance tasks send it alongside the cookie so a stale cookie doesn't hard-fail the task.
+
 ## Development
 
 Stack: React 17.0.2 (legacy API via `window.PluginApi.React`/`ReactDOM`), Vite, Python backend on `stashapi.stashapp.StashInterface`.

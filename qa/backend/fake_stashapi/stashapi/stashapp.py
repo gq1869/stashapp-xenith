@@ -10,7 +10,8 @@ class StashInterface:
         self.config = config or {}
 
     def find_performers(self, **kwargs):
-        if self.config.get("session_cookie") == "RAISE_TEST_ERROR":
+        session_cookie = self.config.get("SessionCookie") or {}
+        if session_cookie.get("Value") == "RAISE_TEST_ERROR":
             raise RuntimeError("simulated Stash connection failure")
         return []
 
