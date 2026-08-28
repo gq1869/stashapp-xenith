@@ -17,14 +17,22 @@ export function useNativeCard(kind) {
 // Native cards render StashApp's own <Link>s (image, title, country flag,
 // etc.) which use React Router and would navigate the page behind the
 // battle modal. Intercept and open in a new tab instead.
+//
+// This is wired as onClickCapture, which fires before any bubble-phase
+// listener further down the tree — including controls a theme or other
+// plugin injects into the native card subtree (e.g. Refract's card-flip
+// button). Only preventDefault/stopPropagation on the anchor-redirect path;
+// gating it any earlier would swallow every click in the subtree, not just
+// link clicks.
 export function handleNativeCardClick(e) {
+  const anchor = e.target.closest("a[href]");
+  if (!anchor) return;
+
   e.preventDefault();
   e.stopPropagation();
-  const anchor = e.target.closest("a[href]");
-  if (anchor) {
-    const card = anchor.closest(".hon-card-native-wrap");
-    card?.dispatchEvent(new MouseEvent("mouseleave", { bubbles: true }));
 
-    window.open(anchor.href, "_blank");
-  }
+  const card = anchor.closest(".hon-card-native-wrap");
+  card?.dispatchEvent(new MouseEvent("mouseleave", { bubbles: true }));
+
+  window.open(anchor.href, "_blank");
 }
