@@ -2,6 +2,12 @@
 
 All notable Xenith releases are documented here. Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
 
+## 3.0.1
+
+### Fixed
+
+- Native-card click interception (used to redirect performer/scene links to a new tab instead of navigating out of the battle modal) was swallowing every click in the card, including clicks on controls injected by other plugins or themes — e.g. the [Refract](https://github.com/ordureconnoisseur/stash-refract) theme's card-flip button. Now only intercepts actual link clicks.
+
 ## 3.0.0
 
 Xenith is an Elo-based head-to-head ranking and leaderboard plugin for [Stash](https://github.com/stashapp/stash). Rate performers and scenes by choosing winners in head-to-head matchups; ratings settle into a six-tier system (S through F) that reflects relative appeal rather than absolute scores. Requires Stash v0.31+.
