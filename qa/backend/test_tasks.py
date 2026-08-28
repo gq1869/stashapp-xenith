@@ -767,7 +767,9 @@ def test_wipe_accepts_every_scope_via_subprocess(scope, tmp_path):
 
 
 def test_task_exception_is_caught_and_reported_as_clean_json_error(tmp_path):
-    payload = json.dumps({"server_connection": {"SessionCookie": "RAISE_TEST_ERROR"}})
+    payload = json.dumps(
+        {"server_connection": {"SessionCookie": {"Value": "RAISE_TEST_ERROR"}}}
+    )
     proc = run_main("reset", payload, tmp_path=tmp_path)
     stdout_lines = [line for line in proc.stdout.strip().splitlines() if line.strip()]
 
@@ -798,6 +800,89 @@ def test_every_task_stdout_is_exactly_one_json_line(task_name, tmp_path):
     payload = json.loads(stdout_lines[0])
     assert set(payload.keys()) <= {"output", "error"}
     assert len(payload) == 1
+
+
+@pytest.fixture
+def main_module(monkeypatch, tmp_path):
+    """Import backend/main.py fresh against the fake stashapi package, with
+    StashInterface replaced by a recorder that captures the conn dict it was
+    constructed with instead of doing anything with it."""
+    monkeypatch.syspath_prepend(FAKE_STASHAPI_DIR)
+    monkeypatch.syspath_prepend(BACKEND_DIR)
+    monkeypatch.setenv("XENITH_SNAPSHOTS_DIR", str(tmp_path / "snapshots"))
+
+    for mod in ("main", "tasks", "queries", "stashapi", "stashapi.stashapp", "stashapi.log"):
+        monkeypatch.delitem(sys.modules, mod, raising=False)
+
+    main = importlib.import_module("main")
+
+    captured = {}
+
+    class RecordingStashInterface:
+        def __init__(self, conn=None):
+            captured["conn"] = conn or {}
+
+        def call_GQL(self, *args, **kwargs):
+            return {"systemStatus": {"databasePath": "/fake/stash.sqlite"}}
+
+    monkeypatch.setattr(main, "StashInterface", RecordingStashInterface)
+    main._captured = captured
+    return main
+
+
+def _run_main_in_process(main_module, monkeypatch, argv, stdin_payload):
+    monkeypatch.setattr(sys, "argv", argv)
+    monkeypatch.setattr(sys, "stdin", types.SimpleNamespace(read=lambda: stdin_payload))
+    main_module.main()
+    return main_module._captured["conn"]
+
+
+def test_main_forwards_session_cookie_verbatim_under_the_key_stashapi_reads(
+    main_module, monkeypatch, capsys
+):
+    payload = json.dumps(
+        {"server_connection": {"SessionCookie": {"Value": "abc123"}}}
+    )
+    conn = _run_main_in_process(
+        main_module, monkeypatch, ["main.py", "wipe", "all"], payload
+    )
+    capsys.readouterr()
+
+    assert conn["SessionCookie"] == {"Value": "abc123"}
+
+
+def test_main_drops_a_malformed_session_cookie_instead_of_forwarding_it(
+    main_module, monkeypatch, capsys
+):
+    payload = json.dumps({"server_connection": {"SessionCookie": "not-an-object"}})
+    conn = _run_main_in_process(
+        main_module, monkeypatch, ["main.py", "wipe", "all"], payload
+    )
+    capsys.readouterr()
+
+    assert conn["SessionCookie"] is None
+
+
+def test_main_sends_api_key_from_env_var_when_set(main_module, monkeypatch, capsys):
+    monkeypatch.setenv("XENITH_STASH_API_KEY", "my-api-key")
+    payload = json.dumps({"server_connection": {}})
+    conn = _run_main_in_process(
+        main_module, monkeypatch, ["main.py", "wipe", "all"], payload
+    )
+    capsys.readouterr()
+
+    assert conn["ApiKey"] == "my-api-key"
+
+
+def test_main_api_key_is_falsy_when_env_var_unset(main_module, monkeypatch, capsys):
+    monkeypatch.delenv("XENITH_STASH_API_KEY", raising=False)
+    payload = json.dumps({"server_connection": {}})
+    conn = _run_main_in_process(
+        main_module, monkeypatch, ["main.py", "wipe", "all"], payload
+    )
+    capsys.readouterr()
+
+    assert not conn["ApiKey"]
 
 
 def test_log_operation_stdout_is_exactly_one_json_line_and_lines_land_on_stderr(tmp_path):
