@@ -1,6 +1,6 @@
 name: Xenith
 description: "Elo-based head-to-head ranking and leaderboard for performers and scenes."
-version: 3.0.1
+version: 3.0.2
 
 interface: raw
 errLog: debug
