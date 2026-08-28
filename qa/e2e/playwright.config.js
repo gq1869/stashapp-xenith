@@ -1,5 +1,6 @@
 // @ts-check
 import { defineConfig, devices } from "@playwright/test";
+import { STORAGE_STATE_PATH } from "./promo-global-setup.js";
 
 /**
  * Points at a real, running Stash instance with Xenith installed and
@@ -17,6 +18,11 @@ export default defineConfig({
   fullyParallel: false, // tests share MutationObserver/global window state
   retries: 0,
   reporter: [["list"]],
+  // Only wired in for a PROMO=1 run — logs in once (STASH_USERNAME/
+  // STASH_PASSWORD, see promo-global-setup.js) and saves the session so
+  // the promo-desktop/promo-mobile projects' contexts start authenticated.
+  // Other suites don't opt into this and are unaffected.
+  globalSetup: process.env.PROMO ? "./promo-global-setup.js" : undefined,
   use: {
     baseURL: process.env.STASH_URL || "http://localhost:9999",
     trace: "retain-on-failure",
@@ -37,12 +43,12 @@ export default defineConfig({
     {
       name: "chromium",
       use: { ...devices["Desktop Chrome"] },
-      testIgnore: /device-review\.spec\.js|leaderboard-perf\.spec\.js|swipe\.spec\.js/,
+      testIgnore: /device-review\.spec\.js|leaderboard-perf\.spec\.js|swipe\.spec\.js|promo\.spec\.js/,
     },
     {
       name: "webkit",
       use: { ...devices["Desktop Safari"] },
-      testIgnore: /device-review\.spec\.js|leaderboard-perf\.spec\.js|swipe\.spec\.js/,
+      testIgnore: /device-review\.spec\.js|leaderboard-perf\.spec\.js|swipe\.spec\.js|promo\.spec\.js/,
     },
     // Portrait-mobile project for e2e/swipe.spec.js only — runs on every
     // default `test:e2e` invocation (no env-var gate), unlike the
@@ -155,6 +161,38 @@ export default defineConfig({
             name: "desktop-webkit",
             testMatch: /leaderboard-perf\.spec\.js/,
             use: { ...devices["Desktop Safari"] },
+          },
+        ]
+      : []),
+    // promo.spec.js only, gated behind PROMO=1 for the same reason
+    // DEVICE_REVIEW/PERF gate the projects above — this is a manual,
+    // curated capture run (README/Discourse screenshots), not part of any
+    // default `test:e2e` invocation. Both forced to Chromium for
+    // consistent font rasterization across the whole set, unlike the
+    // dual-engine default projects above which exist to catch engine-
+    // specific bugs rather than produce a polished, uniform image set.
+    ...(process.env.PROMO
+      ? [
+          {
+            // 1440x900 @ DPR 2 — a normal laptop width rendered
+            // retina-crisp for an embedded README/forum image, unlike
+            // device-review's 3840-wide projects which exist to audit
+            // large-monitor layout, not to look good in a screenshot.
+            name: "promo-desktop",
+            testMatch: /promo\.spec\.js/,
+            use: {
+              viewport: { width: 1440, height: 900 },
+              deviceScaleFactor: 2,
+              browserName: "chromium",
+              storageState: STORAGE_STATE_PATH,
+            },
+          },
+          {
+            // Same iPhone 14 Pro + forced-Chromium shape as the
+            // iphone14pro/mobile-portrait projects above.
+            name: "promo-mobile",
+            testMatch: /promo\.spec\.js/,
+            use: { ...devices["iPhone 14 Pro"], browserName: "chromium", storageState: STORAGE_STATE_PATH },
           },
         ]
       : []),

@@ -52,6 +52,17 @@ PERF=1 STASH_URL=http://localhost:9999 npx playwright test \
 DEVICE_REVIEW=1 STASH_URL=http://localhost:9999 npx playwright test \
   -c e2e/playwright.config.js e2e/device-review.spec.js \
   --project=iphone14pro --project=webkit-iphone
+
+# Promo screenshots — curated capture set (README/Discourse images), fully
+# obfuscated data via fixtures/promo.js (invented names, generated
+# placeholder art). Not part of test:e2e; opt in with PROMO=1.
+# promo-global-setup.js logs in once and persists the session, since the
+# promo captures navigate to real native Stash pages (performer/scene
+# detail, grid) alongside the mocked modal, not just the modal itself.
+# STASH_USERNAME/STASH_PASSWORD are only needed if your instance actually
+# has auth enabled — set them if the run fails asking for them.
+PROMO=1 STASH_URL=http://localhost:9999 \
+  npm run test:e2e:promo -- --project=promo-desktop --project=promo-mobile --workers=1
 ```
 
 `test:unit` needs `npm install` (Vitest); `test:backend` runs with zero setup beyond `uv` on PATH. `test:e2e` needs a real Stash instance with the plugin built and installed — GraphQL responses are mocked for determinism, but modal lifecycle, MutationObservers, and DOM injection run against your actual `src/main.js`/`badge-injector.js`/`scene-tooltips.js`.

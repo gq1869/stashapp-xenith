@@ -20,6 +20,14 @@ A few of the underlying design choices:
 - **One unified attenuation formula.** A single non-linear attenuation applies symmetrically to both sides of an upset, rather than several separate multipliers/dampeners layered on top of each other — attenuation itself can't create net rating inflation across the pool.
 - **Fixed, calibrated tier bounds.** Tier cutoffs are calibrated once against the rating math (via Monte Carlo simulation) and held constant, so the same rating always maps to the same tier regardless of how the library's distribution shifts over time.
 
+Size aside, a few of the underlying design decisions differ from Ascension too:
+
+- **New items start neutral, not at the bottom.** Xenith seeds an unrated item at 50/100 — the middle of the scale — so its first few matches can move it either direction. Ascension seeds new items at 1/100, presuming an unrated item is bad until proven otherwise.
+- **Library-scaled K-factor, not a fixed per-mode cap.** Xenith's K-factor bounds grow with pool size; Ascension hardcodes the same range regardless of whether the library has 100 items or 100,000.
+- **Gauntlet mode is a Bayesian posterior, not a climb/fall ladder.** Ascension's gauntlet is a literal climb-until-you-lose structure. Xenith treats every match as evidence updating a posterior over ladder position, so one unlucky early loss doesn't cap the final placement.
+- **One unified attenuation formula, not several stacked ones.** Ascension layers an underdog multiplier, a separate loss-protection curve, and mode-specific win-streak dampeners (gauntlet, champion) on top of each other. Xenith uses a single non-linear attenuation applied symmetrically to both sides of an upset, so attenuation itself can't create net rating inflation across the pool.
+- **Fixed, calibrated tier bounds, not live percentile brackets.** Xenith's tier cutoffs are calibrated once against the rating math and held constant. Ascension recomputes tier boundaries from the pool's current percentile distribution, so the same rating can shift tiers as the library grows even though the item itself didn't get better or worse.
+
 ### What's in it
 
 - Three match modes: classic Swiss-style head-to-head, Gauntlet (place one challenger against the ladder via a Bayesian posterior), and Champion (an incumbent defends against a stream of challengers)

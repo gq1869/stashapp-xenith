@@ -19,6 +19,27 @@ Requires Stash v0.31+.
 
 Snapshot export/import (for backing up and restoring rating history) is available as a maintenance task — see below.
 
+## Screenshots
+
+All screenshots below use generated placeholder art and invented names — no real library content.
+
+<p>
+  <img src="docs/images/head-to-head.png" alt="Head-to-head matchup" width="49%">
+  <img src="docs/images/leaderboard.png" alt="Leaderboard with tier distribution" width="49%">
+</p>
+<p>
+  <img src="docs/images/gauntlet.png" alt="Gauntlet mode mid-run" width="49%">
+  <img src="docs/images/champion.png" alt="Champion mode defending a reign" width="49%">
+</p>
+<p>
+  <img src="docs/images/match-stats.png" alt="Pool-wide match stats" width="49%">
+  <img src="docs/images/rank-badge.png" alt="Detail-page rank badge with match history expanded" width="49%">
+</p>
+<p>
+  <img src="docs/images/mobile-head-to-head.png" alt="Mobile head-to-head view" width="32%">
+  <img src="docs/images/mobile-swipe.png" alt="Mobile swipe gesture mid-drag" width="32%">
+</p>
+
 ## Installation
 
 **Prerequisite, all paths:** Xenith's backend needs `stashapp-tools`. Stash doesn't install Python deps for you, so run `pip install -r requirements.txt` (or `pip install stashapp-tools`) once, regardless of which install method you use below.
