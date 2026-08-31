@@ -91,7 +91,7 @@ PROMO=1 STASH_URL=http://localhost:9999 \
 | Malformed `xenith_stats` JSON falls back to defaults | unit | `parseXenithStats — falls back to defaults on malformed JSON` |
 | Closing modal fully unmounts React | e2e | `closing the modal unmounts React...` |
 | `__xenithCleanup` disconnects both observers | e2e | `window.__xenithCleanup disconnects...` |
-| No duplicate floating nav buttons after SPA nav | e2e | `no duplicate #hon-floating-btn-wrapper...` |
+| No duplicate floating nav buttons after SPA nav (structural — React owns the nav item as a `MainNavBar.MenuItems` child) | e2e | `no duplicate #hon-floating-btn-wrapper...` |
 | Wide-gap match — smoother deltas, no jarring 1-3pt drops | unit | `lossAttenuation-equivalent behavior: loss magnitude decreases monotonically...`, `favorite winning as expected is NOT attenuated...` |
 | Wide-gap upset — both sides' deltas dampened | unit | `winner's gain on a wide-gap upset is attenuated by the same factor as the loser's loss...` |
 | Match cooldown — no reappearance within session, Performers/Scenes don't cross-contaminate | unit | `regression: a performer id and a scene id with the same numeric value don't collide`, plus integration: `a performer just matched doesn't reappear as a candidate...`, `switching Performers <-> Scenes mid-session doesn't cross-contaminate...` |
