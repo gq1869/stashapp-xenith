@@ -609,6 +609,8 @@ test("window.__xenithCleanup disconnects the route observer and is idempotent/re
 
 // ---------------------------------------------------------------------
 // 15. No duplicate floating nav buttons after multiple SPA route changes
+// (structural now — the nav item is a real MainNavBar.MenuItems child
+// React reconciles on every render, not a hand-appended DOM node)
 // ---------------------------------------------------------------------
 test("no duplicate #hon-floating-btn-wrapper after repeated SPA navigation", async ({ page }) => {
   for (const path of ["/", "/performers", "/scenes", "/", "/performers"]) {
