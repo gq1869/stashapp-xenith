@@ -4,6 +4,8 @@ on:
   push:
     branches:
       - main
+    tags:
+      - "v*"
   workflow_dispatch: {}
 
 permissions:
@@ -20,26 +22,72 @@ jobs:
     if: ${{ !github.event.repository.private }}
     runs-on: ubuntu-latest
     steps:
+      # canary/ tracks main - checked out unconditionally.
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          ref: main
+          path: canary
           fetch-depth: 0
+
+      # stable/ tracks the latest non-prerelease v* tag. Resolved from the
+      # canary checkout's tags (both checkouts share the same repo) so a
+      # second fetch isn't needed. `grep -v -- '-'` excludes prereleases,
+      # mirroring release.yml's own "tag containing '-' is a prerelease" rule
+      # - otherwise v3.1.0-rc1 would become stable.
+      - name: Resolve latest stable tag
+        id: stable-tag
+        working-directory: canary
+        run: |
+          tag=$(git tag -l 'v*' --sort=-v:refname | grep -v -- '-' | head -1 || true)
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+          if [ -z "$tag" ]; then
+            echo "::warning::no v* release tag found - stable channel will be skipped"
+          fi
+
+      # A fresh fork with no release tag yet has nothing to call "stable" -
+      # skipped rather than falling back to main, which would silently ship
+      # unreleased code as stable.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        if: steps.stable-tag.outputs.tag != ''
+        with:
+          ref: ${{ steps.stable-tag.outputs.tag }}
+          path: stable
+          fetch-depth: 0
+
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: 22
           cache: npm
-          cache-dependency-path: package-lock.json
-      - run: npm ci
-      - run: npm run build
-      - name: Build plugin source index
-        run: bash .github/scripts/build-site.sh _site/stable
-      - name: Redirect Pages root to stable/index.yml
+          cache-dependency-path: canary/package-lock.json
+
+      - name: Build canary channel
+        working-directory: canary
         run: |
+          npm ci
+          npm run build:canary
+          bash .github/scripts/build-site.sh "$GITHUB_WORKSPACE/_site/canary" canary
+
+      - name: Build stable channel
+        if: steps.stable-tag.outputs.tag != ''
+        working-directory: stable
+        run: |
+          npm ci
+          npm run build
+          bash .github/scripts/build-site.sh "$GITHUB_WORKSPACE/_site/stable" stable
+
+      - name: Write Pages landing page
+        run: |
+          mkdir -p _site
           cat > _site/index.html <<'EOF'
           <!DOCTYPE html>
           <meta charset="utf-8">
-          <meta http-equiv="refresh" content="0; url=stable/index.yml">
-          <link rel="canonical" href="stable/index.yml">
-          <p><a href="stable/index.yml">stable/index.yml</a></p>
+          <title>Xenith plugin sources</title>
+          <p>Add one of these as a plugin source in Stash (Settings &rarr; Plugins &rarr; Add Source):</p>
+          <ul>
+            <li><a href="stable/index.yml">stable/index.yml</a> &mdash; latest release (recommended)</li>
+            <li><a href="canary/index.yml">canary/index.yml</a> &mdash; latest main, unreleased</li>
+          </ul>
+          <p>Add only one - installing from the other replaces it (both share the same plugin id).</p>
           EOF
       - uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d # v6.0.0
       - uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5

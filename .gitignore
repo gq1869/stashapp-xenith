@@ -34,3 +34,6 @@ Thumbs.db
 snapshots/
 .artifacts/
 .claude/
+_site/
+_bundle/
+xenith.zip
