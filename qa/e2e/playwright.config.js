@@ -1,6 +1,6 @@
 // @ts-check
 import { defineConfig, devices } from "@playwright/test";
-import { STORAGE_STATE_PATH } from "./promo-global-setup.js";
+import { STORAGE_STATE_PATH } from "./auth-setup.js";
 
 /**
  * Points at a real, running Stash instance with Xenith installed and
@@ -18,15 +18,18 @@ export default defineConfig({
   fullyParallel: false, // tests share MutationObserver/global window state
   retries: 0,
   reporter: [["list"]],
-  // Only wired in for a PROMO=1 run — logs in once (STASH_USERNAME/
-  // STASH_PASSWORD, see promo-global-setup.js) and saves the session so
-  // the promo-desktop/promo-mobile projects' contexts start authenticated.
-  // Other suites don't opt into this and are unaffected.
-  globalSetup: process.env.PROMO ? "./promo-global-setup.js" : undefined,
+  // Runs on every invocation, not just PROMO=1 — logs in once (see
+  // auth-setup.js for credential resolution order) if the target Stash
+  // instance actually has auth enabled, and is a no-op otherwise. The
+  // resulting session (use.storageState below) is shared by every
+  // project, so an auth-enabled instance doesn't dead-end every spec on
+  // its login wall.
+  globalSetup: "./auth-setup.js",
   use: {
     baseURL: process.env.STASH_URL || "http://localhost:9999",
     trace: "retain-on-failure",
     video: "retain-on-failure",
+    storageState: STORAGE_STATE_PATH,
   },
   projects: [
     // testIgnore excludes device-review.spec.js and leaderboard-perf.spec.js
@@ -184,7 +187,6 @@ export default defineConfig({
               viewport: { width: 1440, height: 900 },
               deviceScaleFactor: 2,
               browserName: "chromium",
-              storageState: STORAGE_STATE_PATH,
             },
           },
           {
@@ -192,7 +194,7 @@ export default defineConfig({
             // iphone14pro/mobile-portrait projects above.
             name: "promo-mobile",
             testMatch: /promo\.spec\.js/,
-            use: { ...devices["iPhone 14 Pro"], browserName: "chromium", storageState: STORAGE_STATE_PATH },
+            use: { ...devices["iPhone 14 Pro"], browserName: "chromium" },
           },
         ]
       : []),

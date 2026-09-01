@@ -59,6 +59,6 @@ test("diagnose why Xenith isn't rendering", async ({ page }) => {
 
   expect(pageErrors, `uncaught JS error during load: ${pageErrors[0]}`).toHaveLength(0);
   expect(hasPluginApi, "window.PluginApi was never defined — script load order issue").toBe(true);
-  expect(hasNavbar, ".navbar-nav missing — Stash markup may not match what addFloatingButton() expects").toBeGreaterThan(0);
+  expect(hasNavbar, ".navbar-nav missing — Stash markup may not match what the MainNavBar.MenuItems patch expects").toBeGreaterThan(0);
   expect(hasButton, "#hon-floating-btn never got created").toBeGreaterThan(0);
 });

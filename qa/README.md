@@ -36,6 +36,13 @@ npm test                      # unit + backend together — the CI-safe subset
 STASH_URL=http://localhost:9999 npm run test:e2e            # needs a live Stash with Xenith loaded
 STASH_URL=http://localhost:9999 npm run test:e2e:diagnose   # single diagnostic spec, same live-Stash requirement
 
+# If the target instance has auth enabled, every project needs a login
+# first (auth-setup.js's globalSetup, see below) — set STASH_USERNAME/
+# STASH_PASSWORD, or STASH_CREDS_FILE pointing at a two-line
+# username/password file. Neither is needed against an already-open
+# instance; a login form appearing is what decides that, not whether
+# credentials are set.
+
 # Leaderboard rendering perf harness — mobile-WebKit (not
 # Chromium emulation) plus desktop Chromium/WebKit, against both a
 # 2,473-performer pool and a 16,000-scene pool. Not part of test:e2e; opt in
@@ -55,12 +62,9 @@ DEVICE_REVIEW=1 STASH_URL=http://localhost:9999 npx playwright test \
 
 # Promo screenshots — curated capture set (README/Discourse images), fully
 # obfuscated data via fixtures/promo.js (invented names, generated
-# placeholder art). Not part of test:e2e; opt in with PROMO=1.
-# promo-global-setup.js logs in once and persists the session, since the
-# promo captures navigate to real native Stash pages (performer/scene
-# detail, grid) alongside the mocked modal, not just the modal itself.
-# STASH_USERNAME/STASH_PASSWORD are only needed if your instance actually
-# has auth enabled — set them if the run fails asking for them.
+# placeholder art). Not part of test:e2e; opt in with PROMO=1. Auth
+# credentials, if your instance needs them, work the same as the general
+# test:e2e note above.
 PROMO=1 STASH_URL=http://localhost:9999 \
   npm run test:e2e:promo -- --project=promo-desktop --project=promo-mobile --workers=1
 ```

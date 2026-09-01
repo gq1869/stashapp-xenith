@@ -8,7 +8,7 @@ All notable Xenith releases are documented here. Format loosely follows [Keep a 
 
 ### Fixed
 
-- Tasks (Export Snapshot, Wipe, Reset, etc.) failed with `401 Unauthorized` on any auth-enabled Stash instance — the session cookie Stash hands plugin subprocesses was being forwarded under the wrong key, so `stashapi` never read it and every task request went out unauthenticated. Fixed to send it under the key/shape `stashapi` actually expects. Also adds an `XENITH_STASH_API_KEY` env var as a fallback for the separate case where the session cookie itself goes stale independent of the browser session ([stashapp/stash#5332](https://github.com/stashapp/stash/issues/5332)) — set it in the Stash container's environment and Xenith sends it alongside the cookie.
+- Tasks (Export Snapshot, Wipe, Reset, etc.) failed with `401 Unauthorized` on any auth-enabled Stash instance — the session cookie Stash hands plugin subprocesses was being forwarded under the wrong key, so `stashapi` never read it and every task request went out unauthenticated. Fixed to send it under the key/shape `stashapi` actually expects. Also adds an `XENITH_STASH_API_KEY` env var as a fallback for the separate case where the session cookie itself goes stale independent of the browser session — set it in the Stash container's environment and Xenith sends it alongside the cookie.
 
 ## 3.0.1
 

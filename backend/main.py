@@ -49,7 +49,7 @@ def main():
     # or renamed, or every request goes out unauthenticated. Stash's own
     # ServerConnection payload carries no ApiKey field of its own (see
     # pkg/plugin/common/msg.go upstream), and a session cookie is known to 401
-    # independent of browser login state (stashapp/stash#5332).
+    # independent of browser login state.
     # XENITH_STASH_API_KEY is an optional escape hatch for that case: set it
     # in the container's env and stashapi sends it alongside the cookie.
     conn = input_data.get("server_connection", {})
