@@ -7,6 +7,10 @@ declare module 'react' {
 }
 
 declare global {
+  // Vite `define` literal (vite.config.js) - "stable" or "canary" depending
+  // on the build mode. Dead-code-eliminated to nothing in a stable build.
+  const __XENITH_CHANNEL__: string;
+
   interface Window {
     PluginApi: {
       React: any;

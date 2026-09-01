@@ -36,6 +36,9 @@ export default [
       globals: {
         ...globals.browser,
         ...globals.node,
+        // Vite `define` literal (vite.config.js) - see globals.d.ts for the
+        // matching ambient type declaration.
+        __XENITH_CHANNEL__: "readonly",
       },
     },
   },
