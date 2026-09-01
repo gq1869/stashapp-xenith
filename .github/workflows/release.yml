@@ -23,9 +23,7 @@ jobs:
         run: bash .github/scripts/check-version.sh "${GITHUB_REF_NAME}"
       - run: npm run build
       - name: Stage plugin bundle
-        run: |
-          mkdir -p _bundle/xenith
-          cp -r dist backend xenith.yml requirements.txt README.md LICENSE _bundle/xenith/
+        run: bash .github/scripts/stage-plugin.sh _bundle/xenith
       - name: Build zip
         working-directory: _bundle
         run: zip -r ../xenith.zip xenith -x "*__pycache__*"
