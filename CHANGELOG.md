@@ -6,7 +6,11 @@ All notable Xenith releases are documented here. Format loosely follows [Keep a 
 
 ### Added
 
-- A `canary` release channel alongside `stable` — `stable/index.yml` tracks the latest release tag, `canary/index.yml` tracks the latest `main`. Both share the plugin id, so installing one replaces the other rather than running side by side; a canary build is labelled in the Xenith modal and on the Settings → Plugins page. See the README's Installation section for both URLs.
+- A `canary` release channel alongside `stable` — `stable/index.yml` tracks the latest release tag, `canary/index.yml` tracks the latest `main`. Both share the plugin id, so only one can be installed at a time; a canary build is labelled in the Xenith modal, on the Settings → Plugins page, and in the plugin's own description. See the README's Installation section for both URLs.
+
+### Fixed
+
+- Switching between `stable` and `canary` isn't a one-click swap — Stash's Available Plugins list hides a source's plugin row entirely once the same plugin id is installed from any source, so the other channel doesn't appear to install over the current one. Uninstall the current build first, then the other channel's row reappears. README and both channels' `xenith.yml` descriptions now say so.
 
 ## 3.0.2
 

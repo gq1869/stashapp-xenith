@@ -1,5 +1,5 @@
 name: Xenith
-description: "Elo-based head-to-head ranking and leaderboard for performers and scenes."
+description: "Elo-based head-to-head ranking and leaderboard for performers and scenes. Stable and canary channels share one plugin id, so only one installs at a time - uninstall the current build before switching (see README)."
 version: 3.0.2
 
 interface: raw
