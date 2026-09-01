@@ -250,6 +250,26 @@ body.hon-modal-open {
   outline: 2px solid transparent;
 }
 
+/* Build-channel label - only present in a non-stable build (main.js reads
+   __XENITH_CHANNEL__, a Vite `define` literal, so this markup never exists
+   in a stable build at all). Opposite corner from .hon-modal-close so
+   neither control crowds the other. --hon-tier-a doubles as a high-contrast
+   "this isn't the default build" accent - not tied to tier semantics here. */
+.hon-channel-badge {
+  position: absolute;
+  z-index: 10;
+  top: 12px;
+  left: 12px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: var(--hon-tier-a);
+  color: #fff;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
 /* ─── Plugin layout ────────────────────────────────────────────────────────── */
 .hon-plugin-layout {
   display: flex;
@@ -2364,6 +2384,13 @@ body.hon-modal-open {
     right: calc(8px + env(safe-area-inset-right));
     width: 44px;
     height: 44px;
+  }
+
+  /* Same notch/Dynamic Island clearance as .hon-modal-close above, mirrored
+     to the opposite corner. */
+  .hon-channel-badge {
+    top: calc(8px + env(safe-area-inset-top));
+    left: calc(8px + env(safe-area-inset-left));
   }
 
   /* Reserves real in-flow space at the bottom of the column for the bar

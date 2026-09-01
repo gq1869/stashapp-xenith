@@ -4,6 +4,10 @@ All notable Xenith releases are documented here. Format loosely follows [Keep a 
 
 ## Unreleased
 
+### Added
+
+- A `canary` release channel alongside `stable` — `stable/index.yml` tracks the latest release tag, `canary/index.yml` tracks the latest `main`. Both share the plugin id, so installing one replaces the other rather than running side by side; a canary build is labelled in the Xenith modal and on the Settings → Plugins page. See the README's Installation section for both URLs.
+
 ## 3.0.2
 
 ### Fixed
