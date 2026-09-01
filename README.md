@@ -46,8 +46,11 @@ All screenshots below use generated placeholder art and invented names — no re
 
 ### A. In-app (recommended)
 
-1. Settings → Plugins → Available Plugins → Add Source, and add:
-   `https://gq1869.github.io/stashapp-xenith/stable/index.yml`
+1. Settings → Plugins → Available Plugins → Add Source, and add one of:
+   - `https://gq1869.github.io/stashapp-xenith/stable/index.yml` — latest release (recommended)
+   - `https://gq1869.github.io/stashapp-xenith/canary/index.yml` — latest `main`, unreleased, may break
+
+   Add only one — both channels share the same plugin id, so installing from the other just replaces your current build (ratings and match history live in Stash's own database, not the plugin directory, so switching channels is safe). A canary build is labelled as such in the Xenith modal and in Settings → Plugins.
 2. Find Xenith under Available Plugins and click Install — this installs a prebuilt bundle straight into your Stash `plugins/` directory, no manual build step
 3. Install backend deps (see prerequisite above)
 4. Future updates show up in the same Available Plugins list
