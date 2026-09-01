@@ -103,8 +103,14 @@
 }
 
 /* ─── Font smoothing (Principle 8) ────────────────────────────────────────── */
-:root,
-:root * {
+
+/* Xenith's own roots only — a plugin stylesheet has no business restyling the
+   host app's tree. Both properties are inherited, so the roots are enough;
+   no descendant selector needed. */
+.hon-modal,
+#hon-floating-btn-wrapper,
+#hon-battle-rank-badge,
+.hon-compact-badge {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }

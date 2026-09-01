@@ -10,6 +10,8 @@ All notable Xenith releases are documented here. Format loosely follows [Keep a 
 
 ### Fixed
 
+- The font-smoothing rule in `xenith.css` was scoped to `:root, :root *`, restyling every element in Stash's own tree instead of staying inside Xenith's own DOM. Now scoped to Xenith's own roots only.
+
 - Switching between `stable` and `canary` isn't a one-click swap — Stash's Available Plugins list hides a source's plugin row entirely once the same plugin id is installed from any source, so the other channel doesn't appear to install over the current one. Uninstall the current build first, then the other channel's row reappears. README and both channels' `xenith.yml` descriptions now say so.
 
 ## 3.0.2
