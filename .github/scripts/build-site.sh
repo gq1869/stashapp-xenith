@@ -6,12 +6,21 @@
 #                   installer extracts it straight into plugins/xenith/
 #
 # $2 selects the release channel ("stable" or "canary", default "stable").
-# The channel only ever changes the manifest's/staged yml's `name` and
-# `version` - `id` stays "xenith" for both. That's deliberate: Stash installs
-# a package by id into plugins/<id>/, so a shared id is what makes the two
-# channels mutually exclusive on disk (installing one replaces the other).
-# Don't "fix" this into two ids - that would let both channels be installed
-# side by side.
+# The channel only ever changes the manifest's/staged yml's `name`,
+# `version`, and `description` - `id` stays "xenith" for both. That's
+# deliberate: Stash installs a package by id into plugins/<id>/, so a shared
+# id is what keeps the two channels from ever being installed side by side.
+# Don't "fix" this into two ids - that would let both load into Stash at
+# once (duplicate nav buttons, doubled badge/tooltip injection).
+#
+# One catch: Stash's own Available Plugins UI hides a source's package row
+# entirely once ANY source has that package id installed (it filters by id
+# across all sources, not per-source - see PluginPackageManager.tsx's
+# `loadSource`/`installedPackageIds` in stashapp/stash). So switching
+# channels isn't a one-click "install the other one and it replaces this" -
+# the user has to uninstall the current build first, then the other
+# channel's row reappears to install. The description text below exists to
+# surface that in Stash's own UI, since it's not discoverable otherwise.
 #
 # Assumes `npm run build` (or `npm run build:canary`) has already produced
 # dist/xenith.js and dist/xenith.css - this script does not build the
@@ -52,6 +61,7 @@ updated=$(TZ=UTC0 git log -n 1 --date="format-local:%F %T" --pretty=format:%ad -
 if [ "$channel" = "canary" ]; then
   name="$name (Canary)"
   version="$yml_version-canary.$commit"
+  description="CANARY (latest main, unreleased). $description"
 else
   version="$yml_version-$commit"
 fi
@@ -68,6 +78,7 @@ bash .github/scripts/stage-plugin.sh "$stage"
 if [ "$channel" = "canary" ]; then
   sed -i.bak "s/^name:.*/name: \"$name\"/" "$stage/xenith.yml"
   sed -i.bak "s/^version:.*/version: $version/" "$stage/xenith.yml"
+  sed -i.bak "s/^description:.*/description: \"$description\"/" "$stage/xenith.yml"
   rm -f "$stage/xenith.yml.bak"
 fi
 
