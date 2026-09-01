@@ -92,9 +92,14 @@ function openModal() {
     modalRoot = document.createElement("div");
     modalRoot.id = "hon-modal";
     modalRoot.className = "hon-modal";
+    // __XENITH_CHANNEL__ is a Vite `define` literal (vite.config.js) - this
+    // whole branch dead-code-eliminates to nothing in a stable build.
+    const channelBadge =
+      __XENITH_CHANNEL__ !== "stable" ? `<span class="hon-channel-badge">${__XENITH_CHANNEL__}</span>` : "";
     modalRoot.innerHTML = `
       <div class="hon-modal-backdrop"></div>
       <div class="hon-modal-content">
+        ${channelBadge}
         <button class="hon-modal-close" aria-label="Close">✕</button>
         <div id="hon-app-mount"></div>
       </div>
