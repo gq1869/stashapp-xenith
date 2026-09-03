@@ -103,13 +103,15 @@ Frontend entry is `src/main.js`; components live in `src/components/`. Backend e
 
 ## Acknowledgments
 
-Xenith is part of the Elo/head-to-head ranking plugin family for Stash. It draws on ideas from these earlier plugins in the same lineage:
+Xenith is a reimplementation within the Elo/head-to-head ranking plugin family for Stash, not an independent invention — it inherits specific design decisions and constants from the plugins that came before it in this lineage:
 
 - [Stash Battle](https://github.com/dtt-git/stash-battle/tree/main/plugins/stash-battle)
 - [HotOrNot](https://github.com/lowgrade12/hot-or-not/tree/main/plugins/hotornot)
 - [HotOrNotV2](https://github.com/lowgrade12/hot-or-not/tree/main/plugins/hotOrNotV2)
 - [HotOrNot_V3](https://github.com/Lurking987/stash-plugins/tree/main/plugins/hot_or_not)
 - [Ascension](https://github.com/Servbot91/Sakotos-Stash-Repo/tree/main/plugins/Ascension) ([white paper](https://github.com/Servbot91/Sakotos-Stash-Repo/blob/main/plugins/Ascension/Documentation/White%20Paper.md))
+
+See `NOTICE` for what specifically came from where.
 
 ## License
 

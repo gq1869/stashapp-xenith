@@ -1,0 +1,90 @@
+Xenith — Notice of Provenance
+==============================
+
+Xenith is licensed GPL-3.0 (see LICENSE). This file names what Xenith's
+implementation specifically inherits from earlier plugins in the same
+Elo/head-to-head ranking lineage for Stash, beyond the general acknowledgment
+in README.md.
+
+Ascension (GPL-3.0)
+--------------------
+https://github.com/Servbot91/Sakotos-Stash-Repo/tree/main/plugins/Ascension
+
+The following are carried over from Ascension, with Xenith's own constants
+or mechanism changes noted where they apply:
+
+- The six-tier S/A/B/C/D/F rating tier system, including the letter set,
+  tier count, and ordering. Xenith's tier *bounds* are independently
+  calibrated via Monte Carlo simulation against Xenith's own rating math
+  (see `src/elo.js`'s `TIER_BOUNDS` and `qa/scripts/simulate-tier-bounds.mjs`);
+  the tier frame itself is Ascension's.
+- The session repeat-opponent penalty mechanism and its three weight bands
+  (`src/matchmaking.js`).
+- The sigmoid form of the K-factor experience decay, including its midpoint
+  and slope (`src/elo.js`'s `experienceFactor`); Xenith changes the
+  asymptote and makes the endpoints library-scaled rather than fixed.
+- The low-match boost mechanism and its three multiplier constants
+  (`src/matchmaking.js`); Xenith changes the baseline calculation.
+- The forced cross-tier match event, its trigger probability, and its
+  minimum rating-gap threshold (`src/matchmaking.js`).
+- The top-N weighted seed pool concept and its pool size
+  (`src/matchmaking.js`).
+- The recently-selected candidate tracking mechanism
+  (`addToRecentlySelected`/`isRecentlySelected` in `src/matchmaking.js`);
+  Xenith changes the buffer size and namespaces it per battle type.
+- The opponent-selection failover ordering (anchor window, then a wider
+  window, then nearest-rating, then random) and the two-candidate minimum
+  guard (`src/matchmaking.js`).
+- The rating-gap threshold at which upset attenuation begins to apply
+  (`src/elo.js`). The attenuation curve itself past that threshold is
+  Xenith's own — see the HotOrNot lineage and independent-work notes below.
+- Eleven CSS class names in Xenith's sidebar and modal-action markup
+  (`src/styles/xenith.css`, `src/components/`), listed for completeness:
+  `hon-plugin-layout`, `hon-main-plugin-content`, `hon-sidebar`,
+  `hon-sidebar-row`, `hon-sidebar-row-text`, `hon-sidebar-subrow`,
+  `hon-sidebar-expandable`, `hon-sidebar-expanded-content`,
+  `hon-sidebar-expand-icon`, `hon-action-btn`,
+  `hon-battle-rank-badge-compact`. (As of this notice these are being
+  renamed to a `xen-` prefix; see CHANGELOG for the version this lands in.)
+
+HotOrNot / HotOrNotV2 / HotOrNot_V3 / Stash Battle (AGPL-3.0)
+---------------------------------------------------------------
+https://github.com/lowgrade12/hot-or-not
+https://github.com/Lurking987/stash-plugins/tree/main/plugins/hot_or_not
+https://github.com/dtt-git/stash-battle
+
+The following predate Ascension and are inherited from this earlier
+lineage, which Ascension itself also draws on:
+
+- The `custom_fields` persisted-stats schema (`total_matches`, `wins`,
+  `losses`, `draws`, `current_streak`, `best_streak`, `worst_streak`,
+  `last_match`) and the legacy key names Xenith reads as a migration
+  fallback (`hotornot_stats`, `performer_record` — see `src/matchmaking.js`
+  and `backend/tasks.py`'s `task_migrate`).
+- The three-match-mode structure (a Swiss-style pairwise mode, a
+  ladder-placement mode, and an incumbent-defense mode). Xenith's
+  implementations of each — the Bayesian posterior placement in
+  `src/gauntlet.js` and the reign reducer in `src/champion.js` — are its
+  own; the three-mode structure itself is not.
+- The 15-point rating-gap opponent anchor window (`src/matchmaking.js`).
+- Neutral default initialization of an unrated item at the midpoint of the
+  rating scale (`DEFAULT_RATING` in `src/elo.js`).
+- The general approach of compressing the logistic expected-score divisor
+  below standard Elo's D=400 (Xenith's specific D=35 value is its own; see
+  CHANGELOG's Rating model section).
+- Roughly 29 further shared CSS class names beyond the eleven listed above
+  under Ascension, present throughout this earlier lineage as well
+  (`hon-modal*`, `hon-vs-*`, `hon-stats-*`, and others in
+  `src/styles/xenith.css`).
+
+Independent work
+-----------------
+Xenith's entropy-weighted candidate pairing priority (`src/elo.js`'s
+`entropy`/`priorityScore`, and their use throughout `src/matchmaking.js`),
+its library-scaled K-factor endpoint calculation
+(`computeSystemConfig` in `src/elo.js`), its single symmetric upset
+attenuation formula, its uncertainty-discounted composite score, its
+Monte-Carlo-calibrated tier bounds, its match-count-based cooldown buffers,
+and its Bayesian gauntlet placement engine (`src/gauntlet.js`) have no
+counterpart in the plugins named above and were developed independently for
+Xenith.
