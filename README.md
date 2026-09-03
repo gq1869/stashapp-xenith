@@ -113,4 +113,4 @@ Xenith is part of the Elo/head-to-head ranking plugin family for Stash. It draws
 
 ## License
 
-MIT — see LICENSE.
+GPL-3.0 — see LICENSE.
