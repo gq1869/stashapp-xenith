@@ -36,23 +36,15 @@ This is Xenith's first public release.
 
 ### Why 3.0.0
 
-Xenith is part of a lineage of Elo/head-to-head ranking plugins for Stash — [HotOrNot](https://github.com/lowgrade12/hot-or-not) came first, and later plugins in the family built on those ideas. Xenith is a from-scratch rebuild in that same spirit, with its own take on the rating math and a modular implementation (~9,600 lines across 38 source files, an 81.5 KB JS + 34.8 KB CSS minified bundle).
+Xenith is part of a lineage of Elo/head-to-head ranking plugins for Stash — [HotOrNot](https://github.com/lowgrade12/hot-or-not) came first, and later plugins in the family, including [Ascension](https://github.com/Servbot91/Sakotos-Stash-Repo/tree/main/plugins/Ascension), built on those ideas. Xenith is a reimplementation in that same spirit: its own take on the rating math (~9,600 lines across 38 source files, an 81.5 KB JS + 34.8 KB CSS minified bundle), built on design decisions and constants inherited from that lineage. See `NOTICE` for what came from where.
 
 A few of the underlying design choices:
 
-- **New items start neutral.** An unrated item seeds at 50/100 — the middle of the scale — so its first few matches can move it in either direction rather than only upward.
+- **New items start neutral.** An unrated item seeds at 50/100 — the middle of the scale — so its first few matches can move it in either direction rather than only upward. Inherited from the original HotOrNot.
 - **K-factor scales with library size.** The K-factor bounds grow with pool size, rather than staying fixed regardless of whether the library has 100 items or 100,000.
 - **Gauntlet mode is a Bayesian posterior over ladder position, not a climb/fall bracket.** Every match is treated as evidence updating a posterior, so one unlucky early loss doesn't cap the final placement.
 - **One unified attenuation formula.** A single non-linear attenuation applies symmetrically to both sides of an upset, rather than several separate multipliers/dampeners layered on top of each other — attenuation itself can't create net rating inflation across the pool.
-- **Fixed, calibrated tier bounds.** Tier cutoffs are calibrated once against the rating math (via Monte Carlo simulation) and held constant, so the same rating always maps to the same tier regardless of how the library's distribution shifts over time.
-
-Size aside, a few of the underlying design decisions differ from Ascension too:
-
-- **New items start neutral, not at the bottom.** Xenith seeds an unrated item at 50/100 — the middle of the scale — so its first few matches can move it either direction. Ascension seeds new items at 1/100, presuming an unrated item is bad until proven otherwise.
-- **Library-scaled K-factor, not a fixed per-mode cap.** Xenith's K-factor bounds grow with pool size; Ascension hardcodes the same range regardless of whether the library has 100 items or 100,000.
-- **Gauntlet mode is a Bayesian posterior, not a climb/fall ladder.** Ascension's gauntlet is a literal climb-until-you-lose structure. Xenith treats every match as evidence updating a posterior over ladder position, so one unlucky early loss doesn't cap the final placement.
-- **One unified attenuation formula, not several stacked ones.** Ascension layers an underdog multiplier, a separate loss-protection curve, and mode-specific win-streak dampeners (gauntlet, champion) on top of each other. Xenith uses a single non-linear attenuation applied symmetrically to both sides of an upset, so attenuation itself can't create net rating inflation across the pool.
-- **Fixed, calibrated tier bounds, not live percentile brackets.** Xenith's tier cutoffs are calibrated once against the rating math and held constant. Ascension recomputes tier boundaries from the pool's current percentile distribution, so the same rating can shift tiers as the library grows even though the item itself didn't get better or worse.
+- **Fixed, calibrated tier bounds.** Tier cutoffs are calibrated once against the rating math (via Monte Carlo simulation) and held constant, so the same rating always maps to the same tier regardless of how the library's distribution shifts over time. The six-tier S–F frame itself follows Ascension's.
 
 ### What's in it
 
@@ -67,7 +59,7 @@ Size aside, a few of the underlying design decisions differ from Ascension too:
 
 ### Rating model
 
-Ratings live on a 0-100 scale. Expected score uses a compressed D=35 scale (vs. standard Elo's D=400) so a 10-point gap yields ~67% expected win probability. K-factor is dynamic, scaled to library size and decaying as an item accumulates matches. A single non-linear attenuation formula smooths wide-gap upsets — no separate underdog multiplier or tier dampening layered on top. Display rating (used for leaderboard sort and badge rank) is a composite score that discounts for uncertainty, so a lucky low-match win doesn't outrank an established veteran; tier assignment stays on raw rating. See this repo's design doc for the full derivations and calibration methodology.
+Ratings live on a 0-100 scale. Expected score uses a compressed D=35 scale — standard Elo uses D=400, and the earlier plugins in this lineage already compress it (D=40 in HotOrNot, reverted to D=400 in Ascension); Xenith's D=35 is its own value within that same inherited compression — so a 10-point gap yields ~67% expected win probability. K-factor is dynamic, scaled to library size and decaying as an item accumulates matches. A single non-linear attenuation formula smooths wide-gap upsets — no separate underdog multiplier or tier dampening layered on top. Display rating (used for leaderboard sort and badge rank) is a composite score that discounts for uncertainty, so a lucky low-match win doesn't outrank an established veteran; tier assignment stays on raw rating. See this repo's design doc for the full derivations and calibration methodology.
 
 ### Install
 
