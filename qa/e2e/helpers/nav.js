@@ -36,7 +36,7 @@ export async function openModal(page) {
  * Clicks a sidebar nav row (desktop) or the equivalent mobile control —
  * either a direct toggle button or a picker + bottom-sheet row.
  * @param {import('@playwright/test').Page} page
- * @param {string} label desktop .hon-sidebar-row text
+ * @param {string} label desktop .xen-sidebar-row text
  * @param {string} mobileLabel mobile control text
  */
 export async function selectNav(page, label, mobileLabel) {
@@ -50,7 +50,7 @@ export async function selectNav(page, label, mobileLabel) {
     await page.locator(".hon-mobile-picker", { hasText: "Record" }).click();
     await page.locator(".hon-sheet-row", { hasText: mobileLabel }).click();
   } else {
-    await page.locator(".hon-sidebar-row", { hasText: label }).click();
+    await page.locator(".xen-sidebar-row", { hasText: label }).click();
   }
 }
 
@@ -80,7 +80,7 @@ export async function selectMatchMode(page, mode) {
     await page.locator(".hon-mobile-picker", { hasText: "Match" }).click();
     await page.locator(".hon-sheet-row", { hasText: MATCH_MODE_SHORT[mode] }).click();
   } else {
-    await page.locator(".hon-sidebar-row", { hasText: MATCH_MODE_LABEL[mode] }).click();
+    await page.locator(".xen-sidebar-row", { hasText: MATCH_MODE_LABEL[mode] }).click();
   }
 }
 

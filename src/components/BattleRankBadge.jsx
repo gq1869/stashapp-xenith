@@ -75,7 +75,7 @@ export function BattleRankBadge({ rank, total, rating100, stats, record, battleT
 
   const badge = (
     <div
-      className={`hon-battle-rank-badge ${compact ? "hon-battle-rank-badge-compact" : ""}`}
+      className={`hon-battle-rank-badge ${compact ? "xen-battle-rank-badge-compact" : ""}`}
       title={`Rank #${rank} of ${total} (Rating ${formatDisplayRating(rating100)})`}
     >
       {!compact && (

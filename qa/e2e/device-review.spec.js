@@ -60,7 +60,7 @@ const SELECTORS = [
 // width/top — except .hon-stats-table, which is deliberately excluded: it's
 // meant to be wider than its wrapper and scroll, not clip. The wrapper
 // itself (.hon-stats-table-wrapper) IS checked — it's the table's real
-// scrollport (.hon-stats-table-wrapper below 900px, .hon-main-plugin-content
+// scrollport (.hon-stats-table-wrapper below 900px, .xen-main-plugin-content
 // above it) and must never itself exceed the modal, or the overflow would
 // leak into the rest of the layout instead of scrolling contained. This is
 // what would have caught the .hon-leaderboard overflow bug: the modal's
@@ -140,9 +140,9 @@ async function openModal(page) {
 }
 
 // On mobile-portrait, Sidebar.jsx shows a persistent .hon-mobile-bar
-// instead of the desktop .hon-sidebar-row list — nothing hidden behind a
+// instead of the desktop .xen-sidebar-row list — nothing hidden behind a
 // toggle to expand first, unlike the old "☰ Menu" accordion this replaced.
-// Desktop/landscape rows are always visible, so the .hon-sidebar-row
+// Desktop/landscape rows are always visible, so the .xen-sidebar-row
 // branch is a no-op there.
 //
 // Board / Stats / Filter are still direct single-tap toggles
@@ -162,7 +162,7 @@ async function selectNav(page, label, mobileLabel) {
     await page.locator(".hon-mobile-picker", { hasText: "Record" }).click();
     await page.locator(".hon-sheet-row", { hasText: mobileLabel }).click();
   } else {
-    await page.locator(".hon-sidebar-row", { hasText: label }).click();
+    await page.locator(".xen-sidebar-row", { hasText: label }).click();
   }
 }
 

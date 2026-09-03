@@ -258,14 +258,14 @@ test("touching down alone doesn't tear down the wrapper's transition", async ({ 
   await client.detach();
 });
 
-test("a rightward swipe throw can't turn .hon-main-plugin-content into a horizontal scroll container", async ({ page }) => {
+test("a rightward swipe throw can't turn .xen-main-plugin-content into a horizontal scroll container", async ({ page }) => {
   // Regression guard: the thrown card's translate3d(...) lives on
   // an absolutely-positioned, transformed .hon-swipe-card-wrapper — a
   // transformed box still grows its ancestors' *scrollable* overflow area
   // even though it's visually out of flow. Before the fix, nothing between
   // .hon-vs-container.hon-swipe-stack and .hon-modal-content declared any
   // overflow, so a rightward throw (up to +110% of the container's width)
-  // made .hon-main-plugin-content — the nearest ancestor with overflow:
+  // made .xen-main-plugin-content — the nearest ancestor with overflow:
   // auto, needed there for desktop's stats-table scrollport — scrollable
   // sideways for the ~250ms the throw was live. Checked mid-throw (no
   // waitForTimeout past touchend) since that's the live window; also
@@ -273,7 +273,7 @@ test("a rightward swipe throw can't turn .hon-main-plugin-content into a horizon
   // reports even.
   const scrollBox = () =>
     page.evaluate(() => {
-      const el = document.querySelector(".hon-main-plugin-content");
+      const el = document.querySelector(".xen-main-plugin-content");
       return el ? { scrollWidth: el.scrollWidth, clientWidth: el.clientWidth } : null;
     });
 
@@ -287,7 +287,7 @@ test("a rightward swipe throw can't turn .hon-main-plugin-content into a horizon
   expect(midThrow.scrollWidth).toBe(midThrow.clientWidth);
 
   const scrollLeftAfterAttempt = await page.evaluate(() => {
-    const el = document.querySelector(".hon-main-plugin-content");
+    const el = document.querySelector(".xen-main-plugin-content");
     el.scrollLeft = 9999;
     return el.scrollLeft;
   });

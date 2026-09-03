@@ -230,21 +230,21 @@ export function MatchView({ battleType, pair, ranks, loading, error, choose, ski
       )}
 
       <div className="hon-actions">
-        <div className="hon-action-group">
+        <div className="xen-action-group">
           {/* Label leads/trails the icon by direction of motion: skip moves
               forward (label, then icon), undo moves backward (icon, then
               label) — same convention as the reverse ordering below. */}
-          <button type="button" className="hon-action-btn hon-action-btn-labeled" onClick={skip} disabled={loading || !!result} title="Skip" aria-label="Skip">
-            <span className="hon-action-btn-label">Skip</span>
+          <button type="button" className="xen-action-btn xen-action-btn-labeled" onClick={skip} disabled={loading || !!result} title="Skip" aria-label="Skip">
+            <span className="xen-action-btn-label">Skip</span>
             <SkipIcon />
           </button>
           <span className="hon-hint"><strong>Space</strong> to Skip</span>
         </div>
 
-        <div className="hon-action-group">
-          <button type="button" className="hon-action-btn hon-action-btn-labeled" onClick={undo} disabled={!canUndo || loading} title="Undo" aria-label="Undo">
+        <div className="xen-action-group">
+          <button type="button" className="xen-action-btn xen-action-btn-labeled" onClick={undo} disabled={!canUndo || loading} title="Undo" aria-label="Undo">
             <UndoIcon />
-            <span className="hon-action-btn-label">Undo</span>
+            <span className="xen-action-btn-label">Undo</span>
           </button>
           <span className="hon-hint"><strong>Ctrl+Z</strong> to Undo</span>
         </div>

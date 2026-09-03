@@ -73,16 +73,16 @@ export function Sidebar() {
   // HeadToHead.jsx) would only add a second matchMedia subscription and a
   // hydration-flash risk on the sidebar's very first paint, for no benefit.
   return (
-    <div className="hon-sidebar">
+    <div className="xen-sidebar">
       {/* ── Desktop panel (hidden below 900px) ── */}
-      <div className="hon-sidebar-desktop">
-        <div className="hon-sidebar-group-label">Record Type</div>
-        <div className="hon-sidebar-group" role="radiogroup" aria-label="Record Type">
+      <div className="xen-sidebar-desktop">
+        <div className="xen-sidebar-group-label">Record Type</div>
+        <div className="xen-sidebar-group" role="radiogroup" aria-label="Record Type">
           {RECORD_TYPES.map((r) => (
             <button
               type="button"
               key={r.value}
-              className={`hon-sidebar-row ${battleType === r.value ? "active" : ""}`}
+              className={`xen-sidebar-row ${battleType === r.value ? "active" : ""}`}
               role="radio"
               aria-checked={battleType === r.value}
               onClick={() => setBattleType(r.value)}
@@ -92,13 +92,13 @@ export function Sidebar() {
           ))}
         </div>
 
-        <div className="hon-sidebar-group-label">Mode</div>
-        <div className="hon-sidebar-group" role="radiogroup" aria-label="Mode">
+        <div className="xen-sidebar-group-label">Mode</div>
+        <div className="xen-sidebar-group" role="radiogroup" aria-label="Mode">
           {matchModes.map((m) => (
             <button
               type="button"
               key={m.value}
-              className={`hon-sidebar-row ${m.disabled ? "disabled" : ""} ${
+              className={`xen-sidebar-row ${m.disabled ? "disabled" : ""} ${
                 !m.disabled && matchMode === m.value && tab === "h2h" ? "active" : ""
               }`}
               role="radio"
@@ -107,7 +107,7 @@ export function Sidebar() {
               aria-disabled={m.disabled || undefined}
               onClick={() => selectMatchMode(m.value)}
             >
-              <span className="hon-sidebar-row-text">
+              <span className="xen-sidebar-row-text">
                 {m.icon} {m.label}
               </span>
               {m.hint && <span className="hon-sheet-row-hint">{m.hint}</span>}
@@ -115,10 +115,10 @@ export function Sidebar() {
           ))}
         </div>
 
-        <div className="hon-sidebar-group-label">Stats</div>
+        <div className="xen-sidebar-group-label">Stats</div>
         <button
           type="button"
-          className={`hon-sidebar-row ${tab === "leaderboard" ? "active" : ""}`}
+          className={`xen-sidebar-row ${tab === "leaderboard" ? "active" : ""}`}
           aria-pressed={tab === "leaderboard"}
           onClick={() => setTab("leaderboard")}
         >
@@ -126,7 +126,7 @@ export function Sidebar() {
         </button>
         <button
           type="button"
-          className={`hon-sidebar-row ${tab === "stats" ? "active" : ""}`}
+          className={`xen-sidebar-row ${tab === "stats" ? "active" : ""}`}
           aria-pressed={tab === "stats"}
           onClick={() => setTab("stats")}
         >
@@ -134,7 +134,7 @@ export function Sidebar() {
         </button>
         <button
           type="button"
-          className={`hon-sidebar-row ${tab === "log" ? "active" : ""}`}
+          className={`xen-sidebar-row ${tab === "log" ? "active" : ""}`}
           aria-pressed={tab === "log"}
           onClick={() => setTab("log")}
         >
@@ -145,7 +145,7 @@ export function Sidebar() {
             mobile, both driven by the same openSheet flag. */}
         <button
           type="button"
-          className={`hon-sidebar-row hon-sidebar-expandable ${genderFilterDisabled ? "disabled" : ""} ${
+          className={`xen-sidebar-row xen-sidebar-expandable ${genderFilterDisabled ? "disabled" : ""} ${
             !genderFilterDisabled && openSheet === "gender" ? "expanded" : ""
           }`}
           aria-expanded={!genderFilterDisabled && openSheet === "gender"}
@@ -158,17 +158,17 @@ export function Sidebar() {
               since this label still renders a raw glyph, unlike the action
               buttons (HeadToHead.jsx), which moved to inline SVG (Icons.jsx)
               and no longer need this fix. */}
-          <span className="hon-sidebar-row-text">⚧️ Gender Filter</span>
+          <span className="xen-sidebar-row-text">⚧️ Gender Filter</span>
           {genderFilterDisabled ? (
             <span className="hon-sheet-row-hint">N/A</span>
           ) : (
-            <span className="hon-sidebar-expand-icon" aria-hidden="true">▼</span>
+            <span className="xen-sidebar-expand-icon" aria-hidden="true">▼</span>
           )}
         </button>
         {!genderFilterDisabled && openSheet === "gender" && (
           <div
             id="hon-gender-panel"
-            className="hon-sidebar-expanded-content"
+            className="xen-sidebar-expanded-content"
             role="group"
             aria-label="Gender Filter"
           >
@@ -176,7 +176,7 @@ export function Sidebar() {
               <button
                 type="button"
                 key={g.value}
-                className={`hon-sidebar-subrow ${selectedGenders.includes(g.value) ? "active" : ""}`}
+                className={`xen-sidebar-subrow ${selectedGenders.includes(g.value) ? "active" : ""}`}
                 aria-pressed={selectedGenders.includes(g.value)}
                 onClick={() => toggleGender(g.value)}
               >

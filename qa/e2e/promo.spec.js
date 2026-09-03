@@ -86,7 +86,7 @@ test.describe("promo captures", () => {
     await page.goto("/");
     await openModal(page);
     await selectNav(page, "📈 Match Stats", "Stats");
-    await expect(page.locator(".hon-main-plugin-content")).toBeVisible();
+    await expect(page.locator(".xen-main-plugin-content")).toBeVisible();
     await shot(page, project, "match-stats");
   });
 
@@ -272,7 +272,7 @@ test.describe("promo captures", () => {
     await openModal(page);
     await playMatches(page, 6);
     await selectNav(page, "📜 Match Log", "Log");
-    await expect(page.locator(".hon-main-plugin-content")).toBeVisible();
+    await expect(page.locator(".xen-main-plugin-content")).toBeVisible();
     await shot(page, project, "mobile-match-log");
   });
 });

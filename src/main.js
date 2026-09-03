@@ -34,11 +34,11 @@ function XenithLayout() {
   const Tab = TABS[tab] ?? HeadToHead;
   return React.createElement(
     "div",
-    { className: "hon-plugin-layout" },
+    { className: "xen-plugin-layout" },
     React.createElement(Sidebar),
     React.createElement(
       "div",
-      { className: "hon-main-plugin-content" },
+      { className: "xen-main-plugin-content" },
       React.createElement(Tab)
     )
   );

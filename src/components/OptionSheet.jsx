@@ -86,7 +86,7 @@ export function OptionSheet({ open, onClose, title, options, selected, onSelect,
           onTouchEnd={handleSheetTouchEnd}
         >
           <div className="hon-sheet-grabber" />
-          <div className="hon-sidebar-group-label">{title}</div>
+          <div className="xen-sidebar-group-label">{title}</div>
         </div>
         {options.map((opt) => (
           <button

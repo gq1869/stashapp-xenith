@@ -6,7 +6,7 @@
 // dependency for three glyphs (Design Philosophy: no bloat).
 //
 // All three share a 24x24 grid, 2px stroke (matches the bold
-// .hon-action-btn-label text they sit beside per the icon-weight
+// .xen-action-btn-label text they sit beside per the icon-weight
 // convention), round caps/joins. Sizing is driven by .hon-icon in
 // xenith.css, not inline width/height, so it tracks each button's own
 // font-size step (desktop/mobile/coarse-pointer) automatically.

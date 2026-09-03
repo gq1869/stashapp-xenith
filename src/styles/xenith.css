@@ -184,7 +184,7 @@ body.hon-modal-open {
 }
 
 /* Scales modal type on very large displays without ballooning fixed-px
-   controls (.hon-modal-close, .hon-action-btn, .hon-tier-btn stay put —
+   controls (.hon-modal-close, .xen-action-btn, .hon-tier-btn stay put —
    controls shouldn't grow with the panel). */
 @media (width >= 2200px) {
   .hon-modal-content {
@@ -277,7 +277,7 @@ body.hon-modal-open {
 }
 
 /* ─── Plugin layout ────────────────────────────────────────────────────────── */
-.hon-plugin-layout {
+.xen-plugin-layout {
   display: flex;
   min-height: 0;
   flex: 1;
@@ -287,7 +287,7 @@ body.hon-modal-open {
 /* ─── Sidebar ──────────────────────────────────────────────────────────────── */
 
 /* Principle 3: shadow replaces border for depth */
-.hon-sidebar {
+.xen-sidebar {
   width: 200px;
   max-height: 100%;
   box-sizing: border-box;
@@ -310,7 +310,7 @@ body.hon-modal-open {
    against the containing block and does NOT get reduced for this rule's
    own margin, so it's calc()'d down by the margin's 6px+6px here — keep
    this in sync with the margin below if that value ever changes. */
-.hon-sidebar-row {
+.xen-sidebar-row {
   position: relative;
   display: block;
   width: calc(100% - 12px);
@@ -332,12 +332,12 @@ body.hon-modal-open {
 }
 
 @media (hover: hover) {
-  .hon-sidebar-row:hover {
+  .xen-sidebar-row:hover {
     background: #2a2a2a;
   }
 }
 
-.hon-sidebar-row:focus-visible {
+.xen-sidebar-row:focus-visible {
   box-shadow: var(--hon-focus-ring);
   outline: 2px solid transparent;
 }
@@ -347,12 +347,12 @@ body.hon-modal-open {
    clashing against the new background while the rest of the row turned
    white around them. The tint keeps text/icon contrast high without
    requiring anything inside the row to recolor. */
-.hon-sidebar-row.active {
+.xen-sidebar-row.active {
   background: rgb(13 110 253 / 14%);
   color: #fff;
 }
 
-.hon-sidebar-row.active::before {
+.xen-sidebar-row.active::before {
   position: absolute;
   top: 20%;
   left: 0;
@@ -367,7 +367,7 @@ body.hon-modal-open {
    Stash has no scene-level gender field — Sidebar.jsx's genderFilterDisabled)
    — dimmed, inert, with a trailing hint via .hon-sheet-row-hint (shared with
    the mobile sheet's own disabled-row styling). */
-.hon-sidebar-row.disabled {
+.xen-sidebar-row.disabled {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -376,7 +376,7 @@ body.hon-modal-open {
 }
 
 @media (hover: hover) {
-  .hon-sidebar-row.disabled:hover {
+  .xen-sidebar-row.disabled:hover {
     background: none;
   }
 }
@@ -388,7 +388,7 @@ body.hon-modal-open {
    bounded scrollport instead (see @media (width <= 900px) below), so title/
    filters/distribution above it never move with the table's horizontal
    scroll — this rule stops being the table's scroll ancestor on mobile. */
-.hon-main-plugin-content {
+.xen-main-plugin-content {
   display: flex;
   overflow: auto;
   min-width: 0;
@@ -401,7 +401,7 @@ body.hon-modal-open {
 }
 
 /* min-width: 0 for the same reason as .hon-leaderboard below — a flex-item
-   child of .hon-main-plugin-content's column layout otherwise defaults to
+   child of .xen-main-plugin-content's column layout otherwise defaults to
    min-width: auto and can overflow the modal based on its content's
    min-content width instead of shrinking. */
 .hon-h2h {
@@ -415,7 +415,7 @@ body.hon-modal-open {
 }
 
 /* ─── Sidebar group label ──────────────────────────────────────────────────── */
-.hon-sidebar-group-label {
+.xen-sidebar-group-label {
   padding: 4px 12px;
   margin: 10px 6px 0;
   color: #8a8a8a;
@@ -426,13 +426,13 @@ body.hon-modal-open {
   user-select: none;
 }
 
-.hon-sidebar-group-label:first-child {
+.xen-sidebar-group-label:first-child {
   margin-top: 0;
 }
 
 /* ─── Expandable sidebar row (reused for both the gender filter and, on
    mobile, the top-level sidebar accordion) ─────────────────────────────── */
-.hon-sidebar-row.hon-sidebar-expandable {
+.xen-sidebar-row.xen-sidebar-expandable {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -442,7 +442,7 @@ body.hon-modal-open {
    glyph state, consistent with .hon-distribution-toggle below, which
    already did it this way. -90deg points right, same as the ▶ it
    replaces. */
-.hon-sidebar-expand-icon {
+.xen-sidebar-expand-icon {
   display: inline-block;
   font-size: 0.7rem;
   opacity: 0.55;
@@ -451,20 +451,20 @@ body.hon-modal-open {
   transition-timing-function: var(--hon-ease-out);
 }
 
-.hon-sidebar-row.expanded .hon-sidebar-expand-icon {
+.xen-sidebar-row.expanded .xen-sidebar-expand-icon {
   opacity: 1;
 }
 
-.hon-sidebar-row:not(.expanded) .hon-sidebar-expand-icon,
-.hon-distribution-toggle:not(.expanded) .hon-sidebar-expand-icon {
+.xen-sidebar-row:not(.expanded) .xen-sidebar-expand-icon,
+.hon-distribution-toggle:not(.expanded) .xen-sidebar-expand-icon {
   transform: rotate(-90deg);
 }
 
 /* ─── Expanded content / subrows ───────────────────────────────────────────── */
 
 /* display: block + width: calc(100% - 12px) — same reasoning as
-   .hon-sidebar-row above, calc()'d against this rule's own margin. */
-.hon-sidebar-subrow {
+   .xen-sidebar-row above, calc()'d against this rule's own margin. */
+.xen-sidebar-subrow {
   display: block;
   width: calc(100% - 12px);
   padding: 5px 12px 5px 20px;
@@ -483,18 +483,18 @@ body.hon-modal-open {
 }
 
 @media (hover: hover) {
-  .hon-sidebar-subrow:hover {
+  .xen-sidebar-subrow:hover {
     background: #2a2a2a;
     color: #fff;
   }
 }
 
-.hon-sidebar-subrow:focus-visible {
+.xen-sidebar-subrow:focus-visible {
   box-shadow: var(--hon-focus-ring);
   outline: 2px solid transparent;
 }
 
-.hon-sidebar-subrow.active {
+.xen-sidebar-subrow.active {
   background: rgb(13 110 253 / 10%);
   color: #fff;
 }
@@ -504,7 +504,7 @@ body.hon-modal-open {
    above hidden, inside @media (width <= 900px) below) — replaces the old
    "📋 Menu" accordion, which hid all sidebar state behind a toggle and cost
    two taps per switch. The bar is a normal in-flow flex item (reordered to
-   the bottom via .hon-sidebar's `order`, see the media query), so record
+   the bottom via .xen-sidebar's `order`, see the media query), so record
    type / mode / stats stay readable at rest with zero taps. Record Type,
    Match Type, and Gender Filter each open the shared OptionSheet.jsx
    bottom sheet (.hon-sheet*, generalized from the original gender-only
@@ -1059,7 +1059,7 @@ body.hon-modal-open {
    Principle 12: scale on click
 
    border/font-family/font-size reset the <button> UA defaults — no display
-   fix needed here unlike .hon-sidebar-row above: this button is already a
+   fix needed here unlike .xen-sidebar-row above: this button is already a
    flex item of the card's column layout (margin-top: auto relies on it),
    and flexbox blockifies items regardless of their own display. */
 .hon-choose-btn {
@@ -1110,14 +1110,14 @@ body.hon-modal-open {
   gap: 20px;
 }
 
-.hon-action-group {
+.xen-action-group {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 8px;
 }
 
-/* Shared control chrome for .hon-action-btn (skip/undo, plus Gauntlet's
+/* Shared control chrome for .xen-action-btn (skip/undo, plus Gauntlet's
    "try another" re-roll which reuses this class directly) and
    .hon-run-banner-shuffle (Champion's reroll) — one family, two sizes.
    Rounded square, not a circle: every other control in the file (choose
@@ -1126,7 +1126,7 @@ body.hon-modal-open {
    shared here, since a single radius wouldn't read as "rounded" at both
    sizes. inline-flex + centering is optical alignment for the SVG icon,
    which has no text baseline of its own to align to. */
-.hon-action-btn,
+.xen-action-btn,
 .hon-run-banner-shuffle {
   display: inline-flex;
   align-items: center;
@@ -1145,7 +1145,7 @@ body.hon-modal-open {
    :hover/:active selectors below (stylelint no-descending-specificity) —
    source order, not cascade, since none of these overlap in what property
    they set. */
-.hon-action-btn {
+.xen-action-btn {
   width: 50px;
   height: 50px;
   border-radius: 14px;
@@ -1166,21 +1166,21 @@ body.hon-modal-open {
    "Try another" shuffle re-roll stays untouched, since it doesn't
    carry this class) — width goes auto and the fixed square opens into a
    padded pill. Scoped to its own class rather than baked into
-   .hon-action-btn itself so the icon-only case isn't forced wide. */
-.hon-action-btn-labeled {
+   .xen-action-btn itself so the icon-only case isn't forced wide. */
+.xen-action-btn-labeled {
   width: auto;
   padding: 0 16px;
   gap: 8px;
 }
 
-.hon-action-btn-label {
+.xen-action-btn-label {
   font-family: inherit;
   font-size: 0.85rem;
   font-weight: bold;
 }
 
 /* Champion's "shuffle in a different champion" button — shares its chrome
-   with .hon-action-btn via the combined rule above; only sizing differs,
+   with .xen-action-btn via the combined rule above; only sizing differs,
    scaled down to fit inside the 10px-padded run banner rather than the
    50px box sized for the match action row below. */
 .hon-run-banner-shuffle {
@@ -1191,27 +1191,27 @@ body.hon-modal-open {
   line-height: 1;
 }
 
-.hon-action-btn:disabled,
+.xen-action-btn:disabled,
 .hon-run-banner-shuffle:disabled {
   cursor: not-allowed;
   opacity: 0.4;
 }
 
-.hon-action-btn:focus-visible,
+.xen-action-btn:focus-visible,
 .hon-run-banner-shuffle:focus-visible {
   box-shadow: var(--hon-focus-ring);
   outline: 2px solid transparent;
 }
 
 @media (hover: hover) {
-  .hon-action-btn:not(:disabled):hover,
+  .xen-action-btn:not(:disabled):hover,
   .hon-run-banner-shuffle:not(:disabled):hover {
     border-color: var(--hon-control-border-hover);
     background: var(--hon-control-bg-hover);
   }
 }
 
-.hon-action-btn:not(:disabled):active,
+.xen-action-btn:not(:disabled):active,
 .hon-run-banner-shuffle:not(:disabled):active {
   transform: scale(0.96);
 }
@@ -1259,9 +1259,9 @@ body.hon-modal-open {
    — neither sits inside .hon-vs-container, so .hon-scene-card (which relies
    on that flex parent for its width) needs an explicit constraint here
    instead. min-height: 0 for the same reason as .hon-h2h above: a flex
-   item of .hon-main-plugin-content's column layout otherwise defaults to
+   item of .xen-main-plugin-content's column layout otherwise defaults to
    min-height: auto and refuses to shrink below its content, which is what
-   turned .hon-main-plugin-content's overflow: auto into a real scrollbar
+   turned .xen-main-plugin-content's overflow: auto into a real scrollbar
    instead of the card just fitting the modal. */
 .hon-gauntlet-preview,
 .hon-gauntlet-placement {
@@ -1542,7 +1542,7 @@ body.hon-modal-open {
    on large displays, but a table row that wide is unscannable. */
 .hon-leaderboard {
   /* width: 100% is load-bearing alongside margin-inline: auto: as a
-     flex-column child of .hon-main-plugin-content, auto cross-axis margins
+     flex-column child of .xen-main-plugin-content, auto cross-axis margins
      disable flex stretch and fall back to shrink-to-fit content sizing —
      min-width: 0 alone doesn't help, since shrink-to-fit still sizes to
      the content's own preferred width (the tier-filter row, table header,
@@ -1713,7 +1713,7 @@ body.hon-modal-open {
 }
 
 /* Sticky against whichever ancestor is the real scrollport for the current
-   viewport: .hon-main-plugin-content on desktop (.hon-stats-table-wrapper
+   viewport: .xen-main-plugin-content on desktop (.hon-stats-table-wrapper
    has no overflow of its own there, on purpose, so it doesn't trap this in a
    second, unbounded scroll container), or .hon-stats-table-wrapper itself
    below 900px, where it's bounded and scrolls both axes independently — see
@@ -1945,8 +1945,8 @@ body.hon-modal-open {
   text-transform: uppercase;
 }
 
-/* .hon-sidebar-row.expanded's brighten rule (above) never matches here. */
-.hon-distribution-toggle.expanded .hon-sidebar-expand-icon {
+/* .xen-sidebar-row.expanded's brighten rule (above) never matches here. */
+.hon-distribution-toggle.expanded .xen-sidebar-expand-icon {
   opacity: 1;
 }
 
@@ -2192,7 +2192,7 @@ body.hon-modal-open {
   bottom: 2.5rem;
 }
 
-.hon-battle-rank-badge-compact {
+.xen-battle-rank-badge-compact {
   padding: 2px 7px;
   font-size: 0.72rem;
   gap: 3px;
@@ -2326,12 +2326,12 @@ body.hon-modal-open {
 
 /* ─── Responsive ───────────────────────────────────────────────────────────── */
 @media (width <= 900px) {
-  .hon-plugin-layout {
+  .xen-plugin-layout {
     flex-direction: column;
   }
 
   /* order: 2 moves the bar to the bottom of the column, below
-     .hon-main-plugin-content (order: 1 is the default, so it stays put) —
+     .xen-main-plugin-content (order: 1 is the default, so it stays put) —
      record type / mode / stats read at rest with zero taps, in the thumb
      zone, instead of hiding behind the old top-anchored "Menu" toggle.
      overflow: visible overrides the base rule's overflow-y: auto (only
@@ -2340,14 +2340,14 @@ body.hon-modal-open {
      doesn't depend on this at all.
 
      flex-direction: column, not the flex default (row): .hon-mobile-bar is
-     now this container's only visible child (.hon-sidebar-desktop is
+     now this container's only visible child (.xen-sidebar-desktop is
      hidden below), and a row-flex item with no flex-grow sizes to its own
      content on the main axis instead of stretching — the bar was shrinking
      to its content width instead of filling the row. column makes width
      the cross axis, where align-items: stretch (the flex default) already
      makes a block-level child fill it, so the bar's negative-margin
      full-bleed (below) has a normal auto-width box to expand from. */
-  .hon-sidebar {
+  .xen-sidebar {
     display: flex;
     overflow: visible;
     width: 100%;
@@ -2359,7 +2359,7 @@ body.hon-modal-open {
     box-shadow: none;
   }
 
-  .hon-sidebar-desktop {
+  .xen-sidebar-desktop {
     display: none;
   }
 
@@ -2401,7 +2401,7 @@ body.hon-modal-open {
 
   /* Reserves real in-flow space at the bottom of the column for the bar
      below — a normal flex row (order: 2 above), not an overlay, so it
-     never shrinks .hon-main-plugin-content's card underneath it the way
+     never shrinks .xen-main-plugin-content's card underneath it the way
      the old floating accordion could.
 
      Negative margins cancel .hon-modal-content's own padding (16px +
@@ -2414,11 +2414,11 @@ body.hon-modal-open {
      divider there would be pure decoration.
 
      No explicit width here — this is a block-level flex item of the
-     column-direction .hon-sidebar above (align-items: stretch, the flex
+     column-direction .xen-sidebar above (align-items: stretch, the flex
      default, already fills the cross axis), so its own width stays auto
      and the negative margins below expand it past the containing block's
      edges the normal CSS way. An explicit width: 100% here would instead
-     lock the box to .hon-sidebar's own (already-inset) content width and
+     lock the box to .xen-sidebar's own (already-inset) content width and
      the margins would only shift its position, not enlarge it — the bar
      would end up flush left but short of the right edge. */
   .hon-mobile-bar {
@@ -2515,7 +2515,7 @@ body.hon-modal-open {
   }
 
   /* Tint + top indicator bar rather than a solid fill — same reasoning as
-     .hon-sidebar-row.active above: a solid #0d6efd invert left the
+     .xen-sidebar-row.active above: a solid #0d6efd invert left the
      seg-icon emoji (which can't take currentColor) clashing against the
      new background. */
   .hon-mobile-seg-btn.active,
@@ -2766,7 +2766,7 @@ body.hon-modal-open {
 
   /* .hon-leaderboard needs a real, bounded cross-axis height for
      .hon-stats-table-wrapper below to size a percentage height against — on
-     desktop it's just a flex-column child of .hon-main-plugin-content with
+     desktop it's just a flex-column child of .xen-main-plugin-content with
      no height of its own, which is fine there since that ancestor is the
      scrollport. Below 900px the wrapper takes over as the table's own
      scrollport instead, so .hon-leaderboard needs to actually constrain its
@@ -2925,7 +2925,7 @@ body.hon-modal-open {
     pointer-events: none;
   }
 
-  .hon-distribution-toggle .hon-sidebar-expand-icon {
+  .hon-distribution-toggle .xen-sidebar-expand-icon {
     display: none;
   }
 
@@ -2935,7 +2935,7 @@ body.hon-modal-open {
 }
 
 /* Portrait mobile: sidebar becomes a single accordion (reusing the same
-   .hon-sidebar-expandable/.expanded pattern as the nested gender filter),
+   .xen-sidebar-expandable/.expanded pattern as the nested gender filter),
    and the VS divider switches from a vertical bar (stacked cards read
    top-to-bottom) to a horizontal one (left bar — vs — right bar). */
 @media (width <= 900px) and (orientation: portrait) {
@@ -2955,11 +2955,11 @@ body.hon-modal-open {
      on this stacked mobile layout (cards above, actions row below), so
      height is what needed to come down; width is free to stay whatever
      the content needs. ::after bleeds the hit area back out since 40px
-     falls under the 44px touch floor. Icon-only .hon-action-btn instances
+     falls under the 44px touch floor. Icon-only .xen-action-btn instances
      (Gauntlet's shuffle re-roll) shrink to a 40px square here; the labeled
      variant below overrides width back to auto since there's no reason to
      hide the label once only height is constrained. */
-  .hon-action-btn {
+  .xen-action-btn {
     position: relative;
     width: 40px;
     height: 40px;
@@ -2967,14 +2967,14 @@ body.hon-modal-open {
     font-size: 1.15rem;
   }
 
-  .hon-action-btn::after {
+  .xen-action-btn::after {
     position: absolute;
     display: block;
     content: "";
     inset: -2px;
   }
 
-  .hon-action-btn-labeled {
+  .xen-action-btn-labeled {
     width: auto;
   }
 
@@ -2999,7 +2999,7 @@ body.hon-modal-open {
      *scrollable* overflow area even though it's visually removed from
      flow. Nothing between here and .hon-modal-content's own overflow:
      clip declared any overflow at all, so a rightward swipe (translated
-     up to +110% of this container's width) grew .hon-main-plugin-content
+     up to +110% of this container's width) grew .xen-main-plugin-content
      (the nearest ancestor with overflow: auto — its own desktop
      single-scrollport rule above) into a real horizontal scroll container
      for the ~250ms the throw was live. This container's own touch-action:
@@ -3014,7 +3014,7 @@ body.hon-modal-open {
      the clip edge sits at the true viewport edge rather than this
      container's own bounds, leaving the throw animation's paint
      unchanged. Fixed here (the transform's own container) rather than on
-     .hon-main-plugin-content, which needs overflow: auto on both axes for
+     .xen-main-plugin-content, which needs overflow: auto on both axes for
      desktop's sticky-header stats table. */
   .hon-vs-container.hon-swipe-stack {
     position: relative;
@@ -3126,7 +3126,7 @@ body.hon-modal-open {
 
   /* Same shrink as the width <= 900px block above (identical values,
      duplicated per this block's own convention above). */
-  .hon-action-btn {
+  .xen-action-btn {
     position: relative;
     width: 40px;
     height: 40px;
@@ -3134,14 +3134,14 @@ body.hon-modal-open {
     font-size: 1.15rem;
   }
 
-  .hon-action-btn::after {
+  .xen-action-btn::after {
     position: absolute;
     display: block;
     content: "";
     inset: -2px;
   }
 
-  .hon-action-btn-labeled {
+  .xen-action-btn-labeled {
     width: auto;
   }
 

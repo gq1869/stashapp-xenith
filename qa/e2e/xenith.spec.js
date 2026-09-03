@@ -30,7 +30,7 @@ async function closeModal(page) {
 // xenith.css), so it doesn't inherit the grid row that normally gives
 // .hon-scene-card a definite height. Without an explicit height
 // constraint the native card falls back to its image's intrinsic size and
-// overflows .hon-modal-content, which .hon-main-plugin-content's
+// overflows .hon-modal-content, which .xen-main-plugin-content's
 // overflow: auto then turns into a real scrollbar instead of the card
 // just fitting. Checks the bottom edge only — width already has its own
 // max-width: 420px cap (see xenith.css) that this isn't testing.
@@ -75,7 +75,7 @@ test("scene battles request a capped, randomly-sampled page (per_page: 500), nev
   const gql = await mockGraphQL(page);
   await page.goto("/"); // re-mock after beforeEach's mock is replaced by gql above
   await openModal(page);
-  await page.locator(".hon-sidebar-row", { hasText: "Scenes" }).click();
+  await page.locator(".xen-sidebar-row", { hasText: "Scenes" }).click();
 
   await expect.poll(() => gql.requests.some((r) => r.operation === "FindScenesCandidates")).toBeTruthy();
   const findScenes = gql.requests.filter((r) => r.operation === "FindScenesCandidates").at(-1);
@@ -88,7 +88,7 @@ test("leaderboard performer fetch legitimately uses per_page: -1 (full table is 
   const gql = await mockGraphQL(page);
   await page.goto("/");
   await openModal(page);
-  await page.locator(".hon-sidebar-row", { hasText: "Leaderboard" }).click();
+  await page.locator(".xen-sidebar-row", { hasText: "Leaderboard" }).click();
 
   // Leaderboard fetches via rank-cache.js's getRankedItems(), which posts
   // api.js's FIND_PERFORMERS_RANK — a separate query from api.js's
@@ -107,8 +107,8 @@ test("switching Record Type to Scenes on the Leaderboard fetches and renders sce
   const gql = await mockGraphQL(page);
   await page.goto("/");
   await openModal(page);
-  await page.locator(".hon-sidebar-row", { hasText: "Scenes" }).click();
-  await page.locator(".hon-sidebar-row", { hasText: "Leaderboard" }).click();
+  await page.locator(".xen-sidebar-row", { hasText: "Scenes" }).click();
+  await page.locator(".xen-sidebar-row", { hasText: "Leaderboard" }).click();
 
   await expect.poll(() => gql.requests.some((r) => r.operation === "FindScenesRank" && r.variables.filter?.per_page === -1))
     .toBeTruthy();
@@ -159,8 +159,8 @@ test("undo is available for at most 15 matches back, never more", async ({ page 
     await page.waitForTimeout(1200); // RESULT_DELAY_MS (1000) in usePair.js, plus margin
   }
   let undoCount = 0;
-  while (await page.locator(".hon-action-btn").nth(1).isEnabled()) {
-    await page.locator(".hon-action-btn").nth(1).click();
+  while (await page.locator(".xen-action-btn").nth(1).isEnabled()) {
+    await page.locator(".xen-action-btn").nth(1).click();
     await page.waitForTimeout(100);
     undoCount++;
     if (undoCount > 20) break; // safety valve against an infinite loop bug
@@ -180,7 +180,7 @@ test("undo works during the outcome overlay, before it auto-advances to the next
   await page.locator('[data-side="left"] .hon-choose-btn').first().click();
 
   // No RESULT_DELAY_MS wait here on purpose — the overlay is still up.
-  const undoBtn = page.locator(".hon-action-btn").nth(1);
+  const undoBtn = page.locator(".xen-action-btn").nth(1);
   await expect(undoBtn).toBeEnabled();
   await undoBtn.click();
 
@@ -370,16 +370,16 @@ test("hovering a scene card preview on the scenes list shows a rank tooltip", as
 // ---------------------------------------------------------------------
 test("switching to Leaderboard mid-scene-battle and back preserves the Scenes selection", async ({ page }) => {
   await openModal(page);
-  await page.locator(".hon-sidebar-row", { hasText: "Scenes" }).click();
-  await expect(page.locator(".hon-sidebar-row.active", { hasText: "Scenes" })).toBeVisible();
+  await page.locator(".xen-sidebar-row", { hasText: "Scenes" }).click();
+  await expect(page.locator(".xen-sidebar-row.active", { hasText: "Scenes" })).toBeVisible();
 
-  await page.locator(".hon-sidebar-row", { hasText: "Leaderboard" }).click();
+  await page.locator(".xen-sidebar-row", { hasText: "Leaderboard" }).click();
   await expect(page.locator(".hon-leaderboard")).toBeVisible();
 
-  await page.locator(".hon-sidebar-row", { hasText: "Head to Head" }).click();
+  await page.locator(".xen-sidebar-row", { hasText: "Head to Head" }).click();
   // state.js's module-scope `persisted` object should have retained
   // battleType: "scenes" across the tab switch.
-  await expect(page.locator(".hon-sidebar-row.active", { hasText: "Scenes" })).toBeVisible();
+  await expect(page.locator(".xen-sidebar-row.active", { hasText: "Scenes" })).toBeVisible();
 });
 
 // ---------------------------------------------------------------------
@@ -390,8 +390,8 @@ test("switching to Leaderboard mid-scene-battle and back preserves the Scenes se
 // ---------------------------------------------------------------------
 test("Gauntlet mode plays scenes: challenger preview renders a scene card and Start Run begins a run", async ({ page }) => {
   await openModal(page);
-  await page.locator(".hon-sidebar-row", { hasText: "Scenes" }).click();
-  await page.locator(".hon-sidebar-row", { hasText: "Gauntlet" }).click();
+  await page.locator(".xen-sidebar-row", { hasText: "Scenes" }).click();
+  await page.locator(".xen-sidebar-row", { hasText: "Gauntlet" }).click();
 
   const preview = page.locator(".hon-gauntlet-preview");
   await expect(preview).toBeVisible();
@@ -413,7 +413,7 @@ test("Gauntlet mode plays scenes: challenger preview renders a scene card and St
 // ---------------------------------------------------------------------
 test("Gauntlet challenger preview (performers) fits inside the modal without scrolling", async ({ page }) => {
   await openModal(page);
-  await page.locator(".hon-sidebar-row", { hasText: "Gauntlet" }).click();
+  await page.locator(".xen-sidebar-row", { hasText: "Gauntlet" }).click();
 
   const preview = page.locator(".hon-gauntlet-preview");
   await expect(preview).toBeVisible();
@@ -439,7 +439,7 @@ test("h2h performer card renders metadata chips led by Rating", async ({ page })
 
 test("h2h scene card renders metadata chips led by Rating, no more .hon-scene-meta row", async ({ page }) => {
   await openModal(page);
-  await page.locator(".hon-sidebar-row", { hasText: "Scenes" }).click();
+  await page.locator(".xen-sidebar-row", { hasText: "Scenes" }).click();
   const chips = page.locator('[data-side="left"] .hon-chip');
   await expect(chips.first()).toHaveText(/^Rating /);
   expect(await chips.count()).toBeGreaterThan(0);
@@ -494,14 +494,14 @@ test("scene chip row height is fixed against a sparse vs. a rich scene pool", as
   // but performers/studio/tags/groups/counts are all empty (scene()'s
   // defaults), a sparse-but-not-bare case.
   await openModal(page);
-  await page.locator(".hon-sidebar-row", { hasText: "Scenes" }).click();
+  await page.locator(".xen-sidebar-row", { hasText: "Scenes" }).click();
   const sparseHeight = await measure();
 
   // Rich pool — every scene has all sixteen chip-eligible fields populated.
   await mockGraphQL(page, { scenes: richScenes() });
   await page.goto("/");
   await openModal(page);
-  await page.locator(".hon-sidebar-row", { hasText: "Scenes" }).click();
+  await page.locator(".xen-sidebar-row", { hasText: "Scenes" }).click();
   const richHeight = await measure();
 
   expect(richHeight).toBeCloseTo(sparseHeight, 0);
@@ -630,18 +630,18 @@ test("changing modes preserves match pair state for Performers and Scenes", asyn
   const perfLeftName = await page.locator('[data-side="left"] .performer-name').textContent();
 
   // Switch to Scenes mode and wait for scene pair to load
-  await page.locator(".hon-sidebar-row", { hasText: "Scenes" }).click();
+  await page.locator(".xen-sidebar-row", { hasText: "Scenes" }).click();
   await expect(page.locator('[data-side="left"] .hon-choose-btn')).toHaveText("✓ Choose This Scene");
   const sceneLeftName = await page.locator('[data-side="left"] .card-section-title').textContent();
 
   // Switch back to Performers — state should be restored, no new fetch
-  await page.locator(".hon-sidebar-row", { hasText: "Performers" }).click();
+  await page.locator(".xen-sidebar-row", { hasText: "Performers" }).click();
   await expect(page.locator('[data-side="left"] .hon-choose-btn')).toHaveText("✓ Choose This Performer");
   const perfLeftNameAfter = await page.locator('[data-side="left"] .performer-name').textContent();
   expect(perfLeftNameAfter).toBe(perfLeftName);
 
   // Switch back to Scenes — state should also be restored
-  await page.locator(".hon-sidebar-row", { hasText: "Scenes" }).click();
+  await page.locator(".xen-sidebar-row", { hasText: "Scenes" }).click();
   await expect(page.locator('[data-side="left"] .hon-choose-btn')).toHaveText("✓ Choose This Scene");
   const sceneLeftNameAfter = await page.locator('[data-side="left"] .card-section-title').textContent();
   expect(sceneLeftNameAfter).toBe(sceneLeftName);
@@ -704,7 +704,7 @@ test("a rating100=0 performer shows F tier consistently on their badge and the l
 
   await page.goto("/");
   await openModal(page);
-  await page.locator(".hon-sidebar-row", { hasText: "Leaderboard" }).click();
+  await page.locator(".xen-sidebar-row", { hasText: "Leaderboard" }).click();
   const row = page.locator("tr", { has: page.locator(`a[href="/performers/${zeroId}"]`) });
   await expect(row).toBeVisible({ timeout: 5000 });
   await expect(row.locator("td").first()).toHaveText("F");
@@ -906,7 +906,7 @@ test("mobile bar controls show a focus-visible ring when tabbed to, and tabbing 
 // 19. Desktop sidebar/tier/choose/close focus-visible rings, the
 // desktop-panel counterpart to the mobile-bar coverage above. Default
 // Desktop Chrome viewport (1280x720) stays above the 900px breakpoint, so
-// .hon-sidebar-desktop (not the mobile bar) is what's on screen here.
+// .xen-sidebar-desktop (not the mobile bar) is what's on screen here.
 //
 // Two of these targets — the sidebar rows/subrows and .hon-choose-btn —
 // were plain <div onClick>s with no tabIndex/role until they were converted
@@ -931,14 +931,14 @@ test("desktop sidebar rows, tier buttons, choose buttons, and modal close show a
   }
 
   const closeBtn = page.locator(".hon-modal-close");
-  const recordRows = page.locator(".hon-sidebar-row", { hasText: /^🎭 Performers$|^🎬 Scenes$/ });
-  const h2hRow = page.locator(".hon-sidebar-row", { hasText: "Head to Head" });
-  const championRow = page.locator(".hon-sidebar-row", { hasText: "Champion" });
-  const gauntletRow = page.locator(".hon-sidebar-row", { hasText: "Gauntlet" });
-  const leaderboardRow = page.locator(".hon-sidebar-row", { hasText: "Leaderboard" });
-  const statsRow = page.locator(".hon-sidebar-row", { hasText: "Match Stats" });
-  const logRow = page.locator(".hon-sidebar-row", { hasText: "Match Log" });
-  const genderRow = page.locator(".hon-sidebar-row.hon-sidebar-expandable");
+  const recordRows = page.locator(".xen-sidebar-row", { hasText: /^🎭 Performers$|^🎬 Scenes$/ });
+  const h2hRow = page.locator(".xen-sidebar-row", { hasText: "Head to Head" });
+  const championRow = page.locator(".xen-sidebar-row", { hasText: "Champion" });
+  const gauntletRow = page.locator(".xen-sidebar-row", { hasText: "Gauntlet" });
+  const leaderboardRow = page.locator(".xen-sidebar-row", { hasText: "Leaderboard" });
+  const statsRow = page.locator(".xen-sidebar-row", { hasText: "Match Stats" });
+  const logRow = page.locator(".xen-sidebar-row", { hasText: "Match Log" });
+  const genderRow = page.locator(".xen-sidebar-row.xen-sidebar-expandable");
 
   // Seed on the close button — the first focusable element in DOM order —
   // via .focus(), never asserted (Chromium doesn't match :focus-visible on
@@ -960,11 +960,11 @@ test("desktop sidebar rows, tier buttons, choose buttons, and modal close show a
 
   // No disabled rows — Champion and Gauntlet both play both battle types,
   // so neither mode row is ever disabled (Sidebar.jsx's MATCH_MODES).
-  await expect(page.locator(".hon-sidebar-row.disabled")).toHaveCount(0);
+  await expect(page.locator(".xen-sidebar-row.disabled")).toHaveCount(0);
 
   // Expand the gender filter and tab into its subrows.
   await genderRow.click();
-  const firstSubrow = page.locator(".hon-sidebar-subrow").first();
+  const firstSubrow = page.locator(".xen-sidebar-subrow").first();
   await assertRing(firstSubrow);
 
   // A choose button (H2H card) also gets the ring. Re-seeded via .focus()
@@ -1055,7 +1055,7 @@ test("mobile Match picker returns to the match from Leaderboard/Stats before it 
 test("winning a scene match writes an xenith_record entry with an id:title opponent", async ({ page }) => {
   const gql = await mockGraphQL(page);
   await openModal(page);
-  await page.locator(".hon-sidebar-row", { hasText: "Scenes" }).click();
+  await page.locator(".xen-sidebar-row", { hasText: "Scenes" }).click();
   await expect(page.locator(".hon-vs-container").first()).toBeVisible();
 
   await page.locator('[data-side="left"] .hon-choose-btn').first().click();

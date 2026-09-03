@@ -181,7 +181,7 @@ function ChallengerPreview({ battleType, challenger, loading, error, onStart, on
           </div>
           <div className="hon-gauntlet-preview-actions">
             <button type="button" className="hon-choose-btn" onClick={onStart}>Start Run</button>
-            <button type="button" className="hon-action-btn" onClick={onTryAnother} title="Try another challenger" aria-label="Try another challenger">
+            <button type="button" className="xen-action-btn" onClick={onTryAnother} title="Try another challenger" aria-label="Try another challenger">
               <ShuffleIcon />
             </button>
           </div>

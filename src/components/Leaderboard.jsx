@@ -75,7 +75,7 @@ function TierDistribution({ rows, open, onToggle, itemLabel }) {
         aria-expanded={open}
       >
         <span>Tier Distribution</span>
-        <span className="hon-sidebar-expand-icon" aria-hidden="true">▼</span>
+        <span className="xen-sidebar-expand-icon" aria-hidden="true">▼</span>
       </button>
       <div className={`hon-distribution-content ${open ? "expanded" : ""}`}>
         <div className="hon-distribution-content-inner">

@@ -62,22 +62,22 @@ async function openModal(page) {
 }
 
 // On mobile-portrait, Sidebar.jsx shows a persistent .hon-mobile-bar
-// instead of the desktop .hon-sidebar-row list (nothing to expand first,
+// instead of the desktop .xen-sidebar-row list (nothing to expand first,
 // unlike the old "☰ Menu" accordion this replaced) — same helper as
 // device-review.spec.js's selectNav. Desktop/landscape rows are always
-// visible, so the .hon-sidebar-row branch is a no-op there.
+// visible, so the .xen-sidebar-row branch is a no-op there.
 async function selectNav(page, label, mobileLabel) {
   const mobileBar = page.locator(".hon-mobile-bar");
   if (await mobileBar.isVisible().catch(() => false)) {
     await page.locator(".hon-mobile-seg-btn, .hon-mobile-filter-btn", { hasText: mobileLabel }).click();
   } else {
-    await page.locator(".hon-sidebar-row", { hasText: label }).click();
+    await page.locator(".xen-sidebar-row", { hasText: label }).click();
   }
 }
 
 // Switching Record Type to Scenes — same pattern as xenith.spec.js's own
 // "switching Record Type to Scenes" coverage: desktop clicks the
-// .hon-sidebar-row directly, mobile opens the Record Type sheet first and
+// .xen-sidebar-row directly, mobile opens the Record Type sheet first and
 // picks the .hon-sheet-row option inside it.
 async function switchToScenes(page) {
   const mobileBar = page.locator(".hon-mobile-bar");
@@ -85,7 +85,7 @@ async function switchToScenes(page) {
     await page.locator(".hon-mobile-picker", { hasText: "Record" }).click();
     await page.locator(".hon-sheet-row", { hasText: "Scenes" }).click();
   } else {
-    await page.locator(".hon-sidebar-row", { hasText: "Scenes" }).click();
+    await page.locator(".xen-sidebar-row", { hasText: "Scenes" }).click();
   }
 }
 
