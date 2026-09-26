@@ -4,6 +4,14 @@ All notable Xenith releases are documented here. Format loosely follows [Keep a 
 
 ## Unreleased
 
+### Added
+
+- `docs/rating-differences.md`, a full comparison of Xenith's rating math against Ascension v1.2.6, the version Xenith forked from — exact functions, exact numbers, measured side by side.
+
+### Changed
+
+- `XENITH.md` retitled from "Architectural & Algorithmic Whitepaper" to "Xenith Ratings Explainer" and rewritten in plain language throughout, for a reader with no math background. Section numbers are unchanged.
+
 ## 3.1.0
 
 ### Added
@@ -59,7 +67,7 @@ A few of the underlying design choices:
 
 ### Rating model
 
-Ratings live on a 0-100 scale. Expected score uses a compressed D=35 scale — standard Elo uses D=400, and the earlier plugins in this lineage already compress it (D=40 in HotOrNot, reverted to D=400 in Ascension); Xenith's D=35 is its own value within that same inherited compression — so a 10-point gap yields ~67% expected win probability. K-factor is dynamic, scaled to library size and decaying as an item accumulates matches. A single non-linear attenuation formula smooths wide-gap upsets — no separate underdog multiplier or tier dampening layered on top. Display rating (used for leaderboard sort and badge rank) is a composite score that discounts for uncertainty, so a lucky low-match win doesn't outrank an established veteran; tier assignment stays on raw rating. See this repo's design doc for the full derivations and calibration methodology.
+Ratings live on a 0-100 scale. Expected score uses a compressed D=35 scale — standard Elo uses D=400, and the earlier plugins in this lineage already compress it (D=40 in HotOrNot, reverted to D=400 in Ascension); Xenith's D=35 is its own value within that same inherited compression — so a 10-point gap yields ~67% expected win probability. K-factor is dynamic, scaled to library size and decaying as an item accumulates matches. A single non-linear attenuation formula smooths wide-gap upsets — no separate underdog multiplier or tier dampening layered on top. Display rating (used for leaderboard sort and badge rank) is a composite score that discounts for uncertainty, so a lucky low-match win doesn't outrank an established veteran; tier assignment stays on raw rating. See this repo's ratings explainer (`XENITH.md`) for the full derivations and calibration methodology.
 
 ### Install
 

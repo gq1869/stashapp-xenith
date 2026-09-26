@@ -88,3 +88,8 @@ Monte-Carlo-calibrated tier bounds, its match-count-based cooldown buffers,
 and its Bayesian gauntlet placement engine (`src/gauntlet.js`) have no
 counterpart in the plugins named above and were developed independently for
 Xenith.
+
+See `docs/rating-differences.md` for a full accounting of where Xenith's
+rating math diverges from Ascension v1.2.6 specifically, the version it was
+forked from, and why — measured side by side with real numbers, not just
+described.

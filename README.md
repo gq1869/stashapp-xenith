@@ -111,7 +111,7 @@ Xenith is a reimplementation within the Elo/head-to-head ranking plugin family f
 - [HotOrNot_V3](https://github.com/Lurking987/stash-plugins/tree/main/plugins/hot_or_not)
 - [Ascension](https://github.com/Servbot91/Sakotos-Stash-Repo/tree/main/plugins/Ascension) ([white paper](https://github.com/Servbot91/Sakotos-Stash-Repo/blob/main/plugins/Ascension/Documentation/White%20Paper.md))
 
-See `NOTICE` for what specifically came from where.
+See `NOTICE` for what specifically came from where, and [`docs/rating-differences.md`](docs/rating-differences.md) for what changed and why.
 
 ## License
 
