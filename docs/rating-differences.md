@@ -10,11 +10,9 @@ See the [ratings explainer](../XENITH.md) for how Xenith's own math works end to
 
 ## 1. The rating gap should decide the odds
 
-I want to continue and reuse Stash's native 0–100 `rating100`.
+I want to continue and reuse Stash's native 0–100 `rating100` but standard Elo has an unbounded rating scale running into the thousands, and Ascension computed win probability with the standard Elo divisor, `D = 400`.
 
-Standard Elo has an unbounded rating scale running into the thousands, and Ascension computed win probability with the standard Elo divisor, `D = 400`.
-
-That means expected win probability ranges from 50.0% to 64.0% across any possible matchup. A 10-point rating gap has an expected win probability of 51.4%, close to a coin flip, and even the most lopsided matchup, a 100-point gap, tops out at 64%.
+That means the favorite's expected win probability ranges from 50.0% to 64.0% across any possible matchup. A 10-point rating gap has an expected win probability of 51.4%, close to a coin flip, and even the most lopsided matchup, a 100-point gap, tops out at 64%.
 
 Xenith uses `D = 35` instead. The same 10-point gap reads as 65.9%. A 40-point gap is 93.3%. The gap between two ratings now decides how surprising a result is, so a rating change reflects how mismatched the pair was.
 
@@ -30,11 +28,15 @@ Over 200,000 simulated matches from a settled pool, with both sides at equal exp
 
 Rating that gets created has nowhere to go but the ceiling, so S-tier fills up over time and a tier badge stops telling you much. `XENITH.md` §3.3 has the longer argument.
 
+EXCEPTION: Xenith's math does net positive rating when the two sides carry different K-factors: a fresh, high-K underdog beating a settled favorite is a deliberate inflow, since new items should move fast.
 ## 3. Fewer knobs
 
-I wanted fewer knobs. v1.2.6 stacks rating-band gain cuts, a rating-over-60 K reduction, experience decay, per-mode K multipliers, and per-mode streak dampeners, many of them damping the same favorite's gain, all multiplying together.
+I wanted the rating engine to reflect design simplicity, meaning fewer knobs and overlapping adjustments. v1.2.6 stacks rating-band gain cuts, a rating-over-60 K reduction, experience decay, per-mode K multipliers, and per-mode streak dampeners, many of them damping the same favorite's gain, all multiplying together.
 
-Xenith ships two that don't overlap: experience decay, where K falls as an item plays more matches, and the one symmetric attenuation from section 2.
+Xenith ships two that don't overlap:
+
+1. Experience decay, where K falls as an item plays more matches, and
+2. Symmetric score attenuation (from section 2)
 
 The stack leaves visible artifacts. At a 90-vs-88 matchup, Ascension gives the winner +4 and takes 7 from the loser, a net of −3, so routine wins near the top lose rating while upsets lower down create it. Every equal-K matchup in Xenith nets to zero wherever it falls on the scale.
 
@@ -45,11 +47,9 @@ I wanted a tier letter to mean the same share of a library no matter whose libra
 Running the same 2,500-performer settled population through both sets gives:
 
 | | S | A | B | C | D | F |
-|---|---|---|---|---|---|---|
+|---|---:|---:|---:|---:|---:|---:|
 | Xenith's calibrated bounds | 3.2% | 12.3% | 25.1% | 30.0% | 20.6% | 8.8% |
 | Round-number bounds, same population | 14.5% | 15.1% | 15.8% | 15.6% | 15.1% | 24.0% |
-
-Pairwise-comparison ratings settle clustered near the middle of the scale, so evenly spaced cutoffs put nearly one in six items in S and almost a quarter in F. Both are static lookup tables at runtime; the difference is how the numbers were chosen.
 
 ## 5. A lucky first win shouldn't top the board
 
@@ -69,7 +69,11 @@ Recency answers "it's been a while since this one played." Entropy answers "whic
 
 Ascension pulls up to 800 items sorted by `updated_at`, with a 5% chance of pulling 200 at random instead, and reuses that sample for the next 50 matches. Xenith pulls up to 500 items at random and resamples on every match.
 
-Xenith's cap is the smaller one. What changes is randomness and refresh rate: on a library bigger than either cap, most of it goes unreached in any one sample either way, and Xenith just reshuffles which slice you draw from far more often.
+Xenith's cap is the smaller one. What changes is randomness and refresh rate: on a library bigger than either cap, most of it goes unreached in any one sample either way. Xenith still samples but just reshuffles which slice you draw from far more often.
+
+
+
+
 
 ## 8. One noisy result shouldn't lock a placement
 
@@ -79,12 +83,8 @@ Xenith's Gauntlet keeps a probability distribution over where you belong on the 
 
 ## What Xenith kept
 
-This isn't a from-scratch system, and `NOTICE` has the full accounting. I kept the six-tier S/A/B/C/D/F frame (only the numeric bounds in section 4 changed), the forced cross-tier match event and its trigger odds, the session repeat-opponent penalty and its weight bands, the recently-selected candidate tracking, the sigmoid shape of the K-factor curve (with a new asymptote and library-scaled endpoints), and the top-N weighted seed pool.
+There is a lot of great work from prior contributors, and `NOTICE` has the full accounting. I kept the forced cross-tier match event and its trigger odds, the session repeat-opponent penalty and its weight bands, the recently-selected candidate tracking, the sigmoid shape of the K-factor curve (with a new asymptote and library-scaled endpoints), and the top-N weighted seed pool.
 
 ## What Xenith doesn't claim
-
-The sampling cap in section 7 still leaves most of a large library out of reach in any one sample.
-
-Xenith's math does net positive rating when the two sides carry different K-factors: a fresh, high-K underdog beating a settled favorite is a deliberate inflow, since new items should move fast. The section 2 comparison uses equal K to isolate the attenuation mechanism, and the K effect is symmetric in aggregate, roughly +3 one way and −3 the other depending on who's fresher.
 
 The attenuation floor (0.15) and decay scale (20) are starting constants chosen for smooth, bounded behavior; no outside requirement produced them. S-tier is a single point, `[100, 100]`, because the lookup is flat. Transitive propagation (`XENITH.md` §3.5) is designed and not built, and the `mDecay` parameter is computed but not yet wired into the shipped sigmoid (§3.2).
