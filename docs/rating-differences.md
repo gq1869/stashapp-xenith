@@ -4,7 +4,7 @@ If you've looked at more than one rating plugin for Stash, you've probably notic
 
 Two principles drove most of it. I wanted the source code fully transparent, even before bundling, and I wanted to reuse as many of Stash's native components as possible.
 
-`NOTICE` lists what Xenith kept from the v1.2.6 fork. This doc covers what changed and why. It compares against v1.2.6 only and will not be updated for anything Ascension has done since.
+Xenith kept a lot from that fork: the forced cross-tier match event and its trigger odds, the session repeat-opponent penalty and its weight bands, recently-selected candidate tracking, the sigmoid shape of the K-factor curve (with a new asymptote and library-scaled endpoints), and the top-N weighted seed pool. `NOTICE` has the full accounting. This doc covers what changed and why. It compares against v1.2.6 only and will not be updated for anything Ascension has done since.
 
 See the [ratings explainer](../XENITH.md) for how Xenith's own math works end to end.
 
@@ -79,11 +79,3 @@ Xenith's cap is the smaller one. On a library bigger than either cap, most of it
 Ascension's Gauntlet-style mode is a climb-or-fall search: win and you face someone higher, lose and you drop into a falling phase. That commits to a direction on a single match.
 
 Xenith's Gauntlet keeps a probability distribution over where you belong on the ladder and updates it after every match. One unlucky loss shifts the odds without fixing the placement. `XENITH.md` §3.8 has the full argument, including why a binary-search bisection was rejected too.
-
-## What Xenith kept
-
-A lot of great work came before Xenith, and `NOTICE` has the full accounting. I kept the forced cross-tier match event and its trigger odds, the session repeat-opponent penalty and its weight bands, the recently-selected candidate tracking, the sigmoid shape of the K-factor curve (with a new asymptote and library-scaled endpoints), and the top-N weighted seed pool.
-
-## What Xenith doesn't claim
-
-The attenuation floor (0.15) and decay scale (20) are starting constants I chose for smooth, bounded behavior; nothing outside the code produced them. S-tier is a single point, `[100, 100]`, because the lookup is flat. Transitive propagation (`XENITH.md` §3.5) is designed and not built, and the `mDecay` parameter is computed but not yet wired into the shipped sigmoid (`XENITH.md` §3.2).
