@@ -13,11 +13,6 @@ https://github.com/Servbot91/Sakotos-Stash-Repo/tree/main/plugins/Ascension
 The following are carried over from Ascension, with Xenith's own constants
 or mechanism changes noted where they apply:
 
-- The six-tier S/A/B/C/D/F rating tier system, including the letter set,
-  tier count, and ordering. Xenith's tier *bounds* are independently
-  calibrated via Monte Carlo simulation against Xenith's own rating math
-  (see `src/elo.js`'s `TIER_BOUNDS` and `qa/scripts/simulate-tier-bounds.mjs`);
-  the tier frame itself is Ascension's.
 - The session repeat-opponent penalty mechanism and its three weight bands
   (`src/matchmaking.js`).
 - The sigmoid form of the K-factor experience decay, including its midpoint
