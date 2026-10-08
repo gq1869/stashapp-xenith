@@ -8,7 +8,18 @@ Two principles drove most of it. I wanted the source code fully transparent, eve
 
 See the [ratings explainer](../XENITH.md) for how Xenith's own math works end to end.
 
-## 1. The rating gap should decide the odds
+## 1. A tier letter should mean the same thing in every library
+
+I wanted a tier letter to mean the same share of any library. Ascension's v1.2.6 floors are round numbers: S at 85, then A at 70, B at 55, C at 40, D at 25. Xenith's (`TIER_BOUNDS`: 100, 84, 59, 31, 9) come out of a Monte Carlo simulation (`qa/scripts/simulate-tier-bounds.mjs`) run against Xenith's own rating math, targeting the percentiles in `XENITH.md` §5.
+
+Pairwise-comparison ratings settle clustered near the middle of the scale, so evenly spaced cutoffs land far from the intended shares. Running the same 2,500-performer settled population through both sets:
+
+| | S | A | B | C | D | F |
+|---|---:|---:|---:|---:|---:|---:|
+| Xenith's calibrated bounds | 3.2% | 12.3% | 25.1% | 30.0% | 20.6% | 8.8% |
+| Round-number bounds, same population | 14.5% | 15.1% | 15.8% | 15.6% | 15.1% | 24.0% |
+
+## 2. The rating gap should decide the odds
 
 I wanted to keep using Stash's native 0–100 `rating100`. Standard Elo runs on an unbounded scale into the thousands, and Ascension computed win probability with its standard divisor, `D = 400`.
 
@@ -16,7 +27,17 @@ That means the favorite's expected win probability ranges from 50.0% to 64.0% ac
 
 Xenith uses `D = 35` instead. The same 10-point gap reads as 65.9%, and a 40-point gap reads as 93.3%. The gap between two ratings now decides how surprising a result is, so a rating change reflects how mismatched the pair was.
 
-## 2. A match shouldn't create rating out of nothing
+## 3. Each click should teach something
+
+I wanted every comparison to teach as much as possible. Ascension weights candidates by recency cubed (`getRecencyWeight`), plus a tier-focus rotation that picks a random tier every 7 to 19 matches and doubles the weight of anything inside it.
+
+Xenith weights candidates by the Shannon entropy of the likely outcome, scaled by how little is known about each side (`priorityScore`), and has no tier rotation.
+
+Recency answers "it's been a while since this one played." Entropy answers "which comparison would tell us the most right now." An evenly matched pair of well-known items can still be very informative, and recency alone can't see that.
+
+This builds on section 2. Under `D = 400` every pair sits between 50% and 64%, so outcome entropy is near its maximum everywhere and can't tell pairs apart. `D = 35` spreads the odds enough for entropy to discriminate.
+
+## 4. A match shouldn't create rating out of nothing
 
 On a scale capped at 100, I wanted every match to be zero-sum: whatever one side gains, the other loses.
 
@@ -28,44 +49,24 @@ Over 200,000 simulated matches from a settled pool, with both sides at equal exp
 
 Rating that gets created has nowhere to go but the ceiling, so S-tier fills up over time and a tier badge stops telling you much. `XENITH.md` §3.3 has the longer argument.
 
-Exception: Xenith can still net positive rating when the two sides carry different K-factors. A fresh, high-K underdog beating a settled favorite is a deliberate inflow, since new items should move fast. The comparison above uses equal K.
+_Caveat: Xenith can still net positive rating when the two sides carry different K-factors. A fresh, high-K underdog beating a settled favorite is a deliberate inflow, since new items should move fast. The comparison above uses equal K._
 
-## 3. Fewer knobs
+## 5. Fewer knobs
 
 I wanted the rating engine simpler, with fewer knobs and no overlapping adjustments. v1.2.6 stacks rating-band gain cuts, a rating-over-60 K reduction, experience decay, per-mode K multipliers, and per-mode streak dampeners. Many of them damp the same favorite's gain, and they all multiply together.
 
 Xenith ships two that don't overlap:
 
-
-1. Experience decay, where K falls as an item plays more matches.
-2. Symmetric attenuation of upsets (from section 2).
+1. Experience decay, where K falls as an item plays more matches
+2. Symmetric attenuation of upsets (from section 4)
 
 The stack leaves visible artifacts. At a 90-vs-88 matchup, Ascension gives the winner +4 and takes 7 from the loser, a net of −3, so routine wins near the top lose rating while upsets lower down create it. Every equal-K matchup in Xenith nets to zero wherever it falls on the scale.
 
-## 4. A tier letter should mean the same thing in every library
-
-I wanted a tier letter to mean the same share of any library. Ascension's v1.2.6 floors are round numbers: S at 85, then A at 70, B at 55, C at 40, D at 25. Xenith's (`TIER_BOUNDS`: 100, 84, 59, 31, 9) come out of a Monte Carlo simulation (`qa/scripts/simulate-tier-bounds.mjs`) run against Xenith's own rating math, targeting the percentiles in `XENITH.md` §5.
-
-Pairwise-comparison ratings settle clustered near the middle of the scale, so evenly spaced cutoffs land far from the intended shares. Running the same 2,500-performer settled population through both sets:
-
-| | S | A | B | C | D | F |
-|---|---:|---:|---:|---:|---:|---:|
-| Xenith's calibrated bounds | 3.2% | 12.3% | 25.1% | 30.0% | 20.6% | 8.8% |
-| Round-number bounds, same population | 14.5% | 15.1% | 15.8% | 15.6% | 15.1% | 24.0% |
-
-## 5. A lucky first win shouldn't top the board
+## 6. A lucky first win shouldn't top the board
 
 Ascension's display score (`compositeScore`) is `rating/100 + winRate * 0.5 + winMargin/1000 + totalMatches/10000`. But `rating100` already is the accumulated record of every win and loss, so adding win rate re-counts it, and the match-count term pays out again for volume. A performer who won their only match can outrank one with a strong rating over 40 matches.
 
 Xenith's is `max(0, rating - 1.645 * sigma) / 100`, where sigma shrinks as match count grows: a one-sided 90% confidence bound that discounts a thin record. In `XENITH.md` §4.3's example, a fresh performer at 1 match and a raw 66 displays at about 48.5, while a 40-match veteran at a raw 53 displays at about 49.1. The veteran still edges out the newcomer.
-
-## 6. Each click should teach something
-
-I wanted every comparison to teach as much as possible. Ascension weights candidates by recency cubed (`getRecencyWeight`), plus a tier-focus rotation that picks a random tier every 7 to 19 matches and doubles the weight of anything inside it.
-
-Xenith weights candidates by the Shannon entropy of the likely outcome, scaled by how little is known about each side (`priorityScore`), and has no tier rotation.
-
-Recency answers "it's been a while since this one played." Entropy answers "which comparison would tell us the most right now." An evenly matched pair of well-known items can still be very informative, and recency alone can't see that.
 
 ## 7. A smaller pool, redrawn every match
 
