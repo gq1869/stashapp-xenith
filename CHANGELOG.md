@@ -6,11 +6,13 @@ All notable Xenith releases are documented here. Format loosely follows [Keep a 
 
 ### Added
 
-- `docs/rating-differences.md`, a full comparison of Xenith's rating math against Ascension v1.2.6, the version Xenith forked from — exact functions, exact numbers, measured side by side.
+- `docs/rating-differences.md`, a comparison of Xenith's rating math against Ascension v1.2.6, the version Xenith forked from, with exact functions and numbers.
 
 ### Changed
 
-- `XENITH.md` retitled from "Architectural & Algorithmic Whitepaper" to "Xenith Ratings Explainer" and rewritten in plain language throughout, for a reader with no math background. Section numbers are unchanged.
+- `XENITH.md` retitled from "Architectural & Algorithmic Whitepaper" to "Xenith Ratings Explainer" and rewritten to improve readability. Section numbers are unchanged.
+- `README.md`, `qa/README.md` and `NOTICE` rewritten to improve readability. `NOTICE` now covers Ascension v1.2.6 only.
+- `qa/README.md`: the cooldown checklist now says 20 matches, matching the buffer size.
 
 ## 3.1.0
 
