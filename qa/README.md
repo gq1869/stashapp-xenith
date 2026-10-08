@@ -1,6 +1,6 @@
 # Xenith QA Suite
 
-Drop this `qa/` folder into the repo root (next to `src/`, `backend/`, `src/main.js`). This is the single entry point for testing Xenith. The coverage map below shows what's automated and where; the handful of things no test can substitute for are called out at the end. Run whichever layer's relevant to what you touched, top to bottom.
+Everything for testing Xenith lives here. The coverage map below shows what's automated and where; the few checks that need a human are at the end. Run the layer that matches what you touched.
 
 ## Three layers
 
@@ -10,7 +10,7 @@ Drop this `qa/` folder into the repo root (next to `src/`, `backend/`, `src/main
 | Backend | `qa/backend` | pytest, against an in-memory `FakeStash` double (`npm run test:backend`) | No |
 | E2E | `qa/e2e` | Playwright, Chromium + WebKit (`npm run test:e2e`) | Yes — live Stash |
 
-Both engines run by default, not just Chromium — they have opposite blind spots on this suite. A sticky-column regression only showed up on real WebKit (Chromium measured no cost at any row count); a mobile-sheet-scroll bug only reproduced on Chromium (WebKit doesn't focus buttons on tap, so the focus-scroll that caused it never fires there). One engine alone misses whichever bug is native to the other.
+Both engines run by default because their blind spots are opposite. A sticky-column regression only showed up on real WebKit (Chromium measured no cost at any row count); a mobile-sheet-scroll bug only reproduced on Chromium (WebKit doesn't focus buttons on tap, so the focus-scroll that caused it never fires there). Either engine alone misses the bugs native to the other.
 
 `qa/e2e/swipe.spec.js` also runs on every default `test:e2e` invocation, via its own `mobile-portrait` project (forced to Chromium — `SwipeStack`'s real-TouchEvent drag needs CDP's `Input.dispatchTouchEvent`, which WebKit's Playwright transport doesn't implement). It exists because a swipe-reveal bug had zero regression coverage before it.
 
@@ -71,7 +71,7 @@ PROMO=1 STASH_URL=http://localhost:9999 \
 
 `test:unit` needs `npm install` (Vitest); `test:backend` runs with zero setup beyond `uv` on PATH. `test:e2e` needs a real Stash instance with the plugin built and installed — GraphQL responses are mocked for determinism, but modal lifecycle, MutationObservers, and DOM injection run against your actual `src/main.js`/`badge-injector.js`/`scene-tooltips.js`.
 
-**E2E is never run automatically by an agent.** This is policy, not a suggestion: only one local machine runs StashApp, so an agent (or CI) invoking `test:e2e` will fail against environment assumptions that don't hold remotely. Running the e2e suite against a live Stash instance is always the user's call, done manually.
+**Agents and CI never run e2e.** Only one local machine runs Stash, so `test:e2e` fails anywhere else. Running it against a live instance is always a manual call.
 
 ### GraphQL mocking convention (e2e)
 
@@ -115,7 +115,7 @@ Plus backend correctness beyond the original checklist's scope: Wipe's exact fie
 
 The integration tests (`unit/matchmaking-integration.test.mjs`) mock `src/api.js`'s `gql()` via Vitest's `vi.mock()` and drive `selectWeightedPair` through 40-150 match sessions against an in-memory tier-heavy pool — exercising the real seed/opponent weighting and cooldown logic end to end, not just the pure helper functions in isolation.
 
-Still genuinely manual: whether a delta "feels" smooth/jarring is a subjective visual judgment no test can substitute for — the unit tests above confirm the underlying math is monotonic and bounded, not how it reads on screen.
+Still manual: whether a delta "feels" smooth/jarring is a subjective visual judgment no test can substitute for — the unit tests above confirm the underlying math is monotonic and bounded, not how it reads on screen.
 
 ## What's deliberately not automated
 
@@ -125,7 +125,7 @@ Still genuinely manual: whether a delta "feels" smooth/jarring is a subjective v
 
 ## Checks that stay hands-on
 
-The rest of the QA scope is covered above. What's left is genuinely not automatable — subjective judgment calls or one-time precautions, not a second testing phase. Scope: Performer/Scene battles, Head-to-Head, Leaderboard, badge injection, backend tasks, sidebar, scene tooltips — the only two battle types are Performers and Scenes (`src/state.js`'s `battleType`); nothing else exists to test.
+Everything else is covered above. What's left needs a human: subjective judgment calls and one-time precautions, not a second testing phase. Scope: Performer/Scene battles, Head-to-Head, Leaderboard, badge injection, backend tasks, sidebar, scene tooltips — the only two battle types are Performers and Scenes (`src/state.js`'s `battleType`); nothing else exists to test.
 
 ### Backend Tasks (run each from Stash's Task Manager UI)
 
@@ -135,7 +135,7 @@ The rest of the QA scope is covered above. What's left is genuinely not automata
 
 - [ ] Wide-gap match (~40+ pt rating difference) — winner/loser deltas feel smoother than the old hard-cap behavior, no jarring 1-3pt drops on expected wins
 - [ ] Wide-gap upset (lower-rated performer wins against a 40+ pt favorite) — both sides' deltas are visibly dampened relative to a close match, neither delta swings wildly
-- [ ] A performer/scene just matched doesn't reappear as a candidate again within the same session until ~10 other matches have happened (20-entry FIFO cooldown, split per battle type — confirm switching Performers ↔ Scenes mid-session doesn't cross-contaminate cooldown)
+- [ ] A performer/scene just matched doesn't reappear as a candidate again within the same session until 20 other matches have happened (20-match FIFO cooldown, split per battle type — confirm switching Performers ↔ Scenes mid-session doesn't cross-contaminate cooldown)
 - [ ] Leaderboard/badge/tooltip rank ordering still looks sane after a Reset + a batch of matches — a lucky 1-match performer shouldn't outrank an established veteran with a similar raw rating (display-rating uncertainty buffer)
 - [ ] S-tier badge — expect it to appear rarely and only at the very top of the rating scale (~3.0-3.6% ceiling occupancy by design — see `src/elo.js`'s `TIER_BOUNDS` comment / `XENITH.md` §5)
 - [ ] Play an extended session (30+ matches) in one tier-heavy area (e.g. mostly C/D performers) — confirm the pool doesn't feel repetitive/stuck on the same few faces, and occasionally surfaces performers from other tiers (entropy weighting)
