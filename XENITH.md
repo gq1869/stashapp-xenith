@@ -32,17 +32,17 @@ Offering a "how much better" slider adds a second judgment on top of the first, 
 
 ### 3.1 Expected Score and the Rating Update
 
-For items A and B with ratings `R_A` and `R_B`, A's expected score is the probability A wins:
+For items A and B with ratings $R_A$ and $R_B$, A's expected score is the probability A wins:
 
-```
-E_A = 1 / (1 + 10^((R_B - R_A) / 35))
-```
+$$
+E_A = \frac{1}{1 + 10^{(R_B - R_A)/35}}
+$$
 
-Equal ratings give exactly 0.5. The actual outcome `S_A` is 1.0, 0.5 or 0.0 (§2.3), and the new rating is the old one nudged by how far the outcome missed the expectation, scaled by a per-item K-factor (§3.2):
+Equal ratings give exactly 0.5. The actual outcome $S_A$ is 1.0, 0.5 or 0.0 (§2.3), and the new rating is the old one nudged by how far the outcome missed the expectation, scaled by a per-item K-factor (§3.2):
 
-```
-R_A' = clamp(R_A + K_A * (S_A - E_A), 0, 100)
-```
+$$
+R_A' = \operatorname{clamp}\bigl(R_A + K_A (S_A - E_A),\ 0,\ 100\bigr)
+$$
 
 An expected win barely moves the rating; a heavy underdog winning moves it a lot. The clamp keeps results on the scale.
 
@@ -50,13 +50,15 @@ An expected win barely moves the rating; a heavy underdog winning moves it a lot
 
 K is large for a new item, so it finds its level fast, and small for a settled one, so a fluke can't yank it around. It decays smoothly with match count.
 
-The endpoints scale with library size, so a 500-item scene library and a 5,000-item performer library each get their own tuning. For a content type with `N` items:
+The endpoints scale with library size, so a 500-item scene library and a 5,000-item performer library each get their own tuning. For a content type with $N$ items:
 
-```
-kMin(N)   = clamp(floor(8 + 3*log10(N/100)), 8, 16)
-kMax(N)   = clamp(floor(24 + 6*log10(N/100)), 24, 40)
-mDecay(N) = clamp(floor(15 + 15*log10(N/100)), 15, 50)
-```
+$$
+\begin{aligned}
+k_{\min}(N) &= \operatorname{clamp}\bigl(\lfloor 8 + 3\log_{10}(N/100) \rfloor,\ 8,\ 16\bigr) \\
+k_{\max}(N) &= \operatorname{clamp}\bigl(\lfloor 24 + 6\log_{10}(N/100) \rfloor,\ 24,\ 40\bigr) \\
+m_{\text{decay}}(N) &= \operatorname{clamp}\bigl(\lfloor 15 + 15\log_{10}(N/100) \rfloor,\ 15,\ 50\bigr)
+\end{aligned}
+$$
 
 At roughly 2,500 items that's `kMax = 32`, `kMin = 12`, `mDecay = 35`: a brand-new item moves up to 32 points on an upset, a veteran at most 12.
 
@@ -80,10 +82,12 @@ _Caveat: a match can still net positive rating when the two sides carry differen
 
 A single lucky win can spike a new item far above where it will settle. Xenith keeps the raw rating as the real number and computes a second, conservative one for display and sorting.
 
-```
-sigma(m)       = 15 / sqrt(m + 1)
-displayRating  = max(0, R - 1.645 * sigma(m))
-```
+$$
+\begin{aligned}
+\sigma(m) &= \frac{15}{\sqrt{m + 1}} \\
+\text{displayRating} &= \max\bigl(0,\ R - 1.645\,\sigma(m)\bigr)
+\end{aligned}
+$$
 
 1.645 is the one-tailed 90% bound: the item's true rating is at least that likely to sit above the displayed value, given how few matches back it up. This is what the Leaderboard sorts by and shows in its Score column. It is deliberately not what decides tier, which stays on raw rating (§5). §4.3 has a worked example.
 
@@ -93,9 +97,9 @@ _Planned. Not built yet._
 
 If A beats B, that's weak evidence A would also beat whatever B has lost to. A future pass would spread a fraction of each rating change to items up to two hops away in the comparison history:
 
-```
-propagatedDelta(X, from A) = directDelta(A) * 0.25^hops * 1/sqrt(matchCount(X) + 1)
-```
+$$
+\Delta_{\text{prop}}(X \leftarrow A) = \Delta_{\text{direct}}(A) \cdot 0.25^{\text{hops}} \cdot \frac{1}{\sqrt{\text{matchCount}(X) + 1}}
+$$
 
 `hops` is one or two; the `0.25` shrinks the effect with distance and the match-count term dampens it for established items. It waits on the K-factor, D-scale and loss-mitigation formulas settling in production, since propagated deltas need stable dynamics to build against. See §7.
 
@@ -103,15 +107,15 @@ propagatedDelta(X, from A) = directDelta(A) * 0.25^hops * 1/sqrt(matchCount(X) +
 
 Two wildly mismatched items give a near-certain result and teach little; two close ones could go either way and teach more. Xenith weighs candidate pairings by Shannon entropy, which peaks at a coin flip and falls toward zero as the outcome becomes predictable:
 
-```
-H(A, B) = -E_A * log2(E_A) - (1 - E_A) * log2(1 - E_A)
-```
+$$
+H(A, B) = -E_A \log_2 E_A - (1 - E_A)\log_2(1 - E_A)
+$$
 
 Undersampled items get a boost, since less is known about them:
 
-```
-priority(A, B) = H(A, B) * (1 + 0.5 * (sigma_A + sigma_B) / 15)
-```
+$$
+\text{priority}(A, B) = H(A, B)\left(1 + 0.5\cdot\frac{\sigma_A + \sigma_B}{15}\right)
+$$
 
 The `/15` normalizes sigma against its maximum (a brand-new item's), so the `0.5` weight applies to a 0-to-1 value. Unnormalized, uncertainty could outweigh entropy up to 15x and priority would mostly be a novelty score with entropy as a tiebreaker.
 
@@ -133,13 +137,16 @@ Other plugins use a climb-or-fall search: win and you face someone higher, lose 
 
 Instead, a run keeps a posterior over where on the ladder the challenger belongs. It starts flat, and each match multiplies in a likelihood using §3.1's expected score:
 
-```
-e_i = expectedScore(ladderRating_i, challengerRating)
+With $e_i$ the expected score of the ladder entry at position $i$ against the challenger, each posterior weight $p_i$ is multiplied by:
 
-posterior_i *= e_i                    if the challenger won
-posterior_i *= (1 - e_i)              if the challenger lost
-posterior_i *= sqrt(e_i * (1 - e_i))  if it was a draw
-```
+$$
+p_i \leftarrow p_i \cdot
+\begin{cases}
+e_i & \text{challenger won} \\
+1 - e_i & \text{challenger lost} \\
+\sqrt{e_i (1 - e_i)} & \text{draw}
+\end{cases}
+$$
 
 then renormalizes to sum to 1. The draw form (Bradley-Terry) peaks where the pair is evenly matched and carries no directional signal, which is the right read of a draw. Every match reshapes the whole distribution, so a surprising early result gets corrected by consistent evidence afterward.
 
