@@ -133,7 +133,7 @@ Everything else is covered above. What's left needs a human: subjective judgment
 
 ### Rating engine
 
-- [ ] Wide-gap match (~40+ pt rating difference) — winner/loser deltas feel smoother than the old hard-cap behavior, no jarring 1-3pt drops on expected wins
+- [ ] Wide-gap match (~40+ pt rating difference) — winner/loser deltas feel smooth, no jarring 1-3pt drops on expected wins
 - [ ] Wide-gap upset (lower-rated performer wins against a 40+ pt favorite) — both sides' deltas are visibly dampened relative to a close match, neither delta swings wildly
 - [ ] A performer/scene just matched doesn't reappear as a candidate again within the same session until 20 other matches have happened (20-match FIFO cooldown, split per battle type — confirm switching Performers ↔ Scenes mid-session doesn't cross-contaminate cooldown)
 - [ ] Leaderboard/badge/tooltip rank ordering still looks sane after a Reset + a batch of matches — a lucky 1-match performer shouldn't outrank an established veteran with a similar raw rating (display-rating uncertainty buffer)

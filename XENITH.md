@@ -297,3 +297,13 @@ Champion (§3.9) retires a reign at a flat 10 defenses. A more principled rule e
 ## 8. How This Compares to Other Rating Plugins
 
 Xenith began as a fork of [Ascension](https://github.com/Servbot91/Sakotos-Stash-Repo/tree/main/plugins/Ascension) v1.2.6 and rewrote most of the rating engine before its first release; `NOTICE` documents what carried over. The biggest change is §2.1 plus §3.3: a scale factor sized for 0 to 100, and an upset dampener that can't add rating to the pool. [`docs/rating-differences.md`](docs/rating-differences.md) has the side-by-side with exact functions and numbers.
+
+## 9. Two Design Decisions Worth Knowing
+
+### 9.1 One Uncertainty Number, Two Jobs
+
+The same quantity, $\sigma = 15 / \sqrt{m + 1}$ for an item with $m$ matches, feeds both the display rating (§3.4) and match selection (§3.6). Both ask how much is known about this item yet, so they share one number instead of two separately tuned notions of confidence that could drift apart. A lucky 1-match item doesn't outrank a veteran on the leaderboard, and an undersampled item is more likely to turn up for its next match, both from the same source.
+
+### 9.2 Pure Math, Impure Edges
+
+The rating math (`src/elo.js`), Gauntlet and Champion (`src/gauntlet.js`, `src/champion.js`), and the stats, chip and leaderboard helpers take plain inputs and return plain outputs, with no GraphQL inside. Anything live, like a library's current item count for K-factor scaling, is fetched in `src/matchmaking.js` and passed in as a number. That boundary lets the unit tests and the tier-bounds simulator run the real math at any scale without a Stash instance behind them.
