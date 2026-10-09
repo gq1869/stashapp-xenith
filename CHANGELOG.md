@@ -4,6 +4,16 @@ All notable Xenith releases are documented here. Format loosely follows [Keep a 
 
 ## Unreleased
 
+### Added
+
+- `docs/rating-differences.md`, a comparison of Xenith's rating math against Ascension v1.2.6, the version Xenith forked from, with exact functions and numbers.
+
+### Changed
+
+- `XENITH.md` retitled from "Architectural & Algorithmic Whitepaper" to "Xenith Ratings Explainer" and rewritten to improve readability. Section numbers are unchanged.
+- `README.md`, `qa/README.md` and `NOTICE` rewritten to improve readability. `NOTICE` now covers Ascension v1.2.6 only.
+- `qa/README.md`: the cooldown checklist now says 20 matches, matching the buffer size.
+
 ## 3.1.0
 
 ### Added
@@ -44,7 +54,7 @@ A few of the underlying design choices:
 - **K-factor scales with library size.** The K-factor bounds grow with pool size, rather than staying fixed regardless of whether the library has 100 items or 100,000.
 - **Gauntlet mode is a Bayesian posterior over ladder position, not a climb/fall bracket.** Every match is treated as evidence updating a posterior, so one unlucky early loss doesn't cap the final placement.
 - **One unified attenuation formula.** A single non-linear attenuation applies symmetrically to both sides of an upset, rather than several separate multipliers/dampeners layered on top of each other — attenuation itself can't create net rating inflation across the pool.
-- **Fixed, calibrated tier bounds.** Tier cutoffs are calibrated once against the rating math (via Monte Carlo simulation) and held constant, so the same rating always maps to the same tier regardless of how the library's distribution shifts over time. The six-tier S–F frame itself follows Ascension's.
+- **Fixed, calibrated tier bounds.** Tier cutoffs are calibrated once against the rating math (via Monte Carlo simulation) and held constant, so the same rating always maps to the same tier regardless of how the library's distribution shifts over time.
 
 ### What's in it
 
@@ -59,7 +69,7 @@ A few of the underlying design choices:
 
 ### Rating model
 
-Ratings live on a 0-100 scale. Expected score uses a compressed D=35 scale — standard Elo uses D=400, and the earlier plugins in this lineage already compress it (D=40 in HotOrNot, reverted to D=400 in Ascension); Xenith's D=35 is its own value within that same inherited compression — so a 10-point gap yields ~67% expected win probability. K-factor is dynamic, scaled to library size and decaying as an item accumulates matches. A single non-linear attenuation formula smooths wide-gap upsets — no separate underdog multiplier or tier dampening layered on top. Display rating (used for leaderboard sort and badge rank) is a composite score that discounts for uncertainty, so a lucky low-match win doesn't outrank an established veteran; tier assignment stays on raw rating. See this repo's design doc for the full derivations and calibration methodology.
+Ratings live on a 0-100 scale. Expected score uses a compressed D=35 scale — standard Elo uses D=400, and the earlier plugins in this lineage already compress it (D=40 in HotOrNot, reverted to D=400 in Ascension); Xenith's D=35 is its own value within that same inherited compression — so a 10-point gap yields ~67% expected win probability. K-factor is dynamic, scaled to library size and decaying as an item accumulates matches. A single non-linear attenuation formula smooths wide-gap upsets — no separate underdog multiplier or tier dampening layered on top. Display rating (used for leaderboard sort and badge rank) is a composite score that discounts for uncertainty, so a lucky low-match win doesn't outrank an established veteran; tier assignment stays on raw rating. See this repo's ratings explainer (`XENITH.md`) for the full derivations and calibration methodology.
 
 ### Install
 
