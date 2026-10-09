@@ -1,6 +1,6 @@
 # Xenith
 
-Elo-based head-to-head ranking and leaderboard plugin for Stash. Pick winners in matchups between performers or scenes; ratings settle into six tiers (S through F) that show relative appeal.
+Elo-based head-to-head ranking and leaderboard plugin for Stash. Pick winners in matchups between performers or scenes; ratings settle into six tiers (S through F).
 
 Requires Stash v0.31+.
 
