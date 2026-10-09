@@ -2,14 +2,21 @@
 
 All notable Xenith releases are documented here. Format loosely follows [Keep a Changelog](https://keepachangelog.com/).
 
-## Unreleased
+## 3.2.0
 
 ### Added
 
 - `docs/rating-differences.md`, a comparison of Xenith's rating math against Ascension v1.2.6, the version Xenith forked from, with exact functions and numbers.
+- `NOTICE`, documenting what Xenith's implementation inherits from Ascension (GPL-3.0) and the HotOrNot lineage (AGPL-3.0).
 
 ### Changed
 
+- The K-factor decay horizon now scales with library size. The sigmoid's midpoint and slope derive from the library-scaled decay length (`mDecay/2` and `mDecay/6`) instead of fixed constants (18 and 6), so larger libraries take proportionally longer to settle. At the 2,500-item baseline the shift is under one match; ratings in very large libraries will move more slowly per match as matches accumulate.
+- Tier bounds recalibrated for the new decay curve: the D floor moves from 9 to 10, so F now tops out at 10 and tier placement near that boundary shifts slightly. S-tier occupancy settles at ~3.2-4.1% of a settled population.
+- License changed from MIT to GPL-3.0.
+- The forced large-gap pairing is now called "wide-gap" instead of "cross-tier" in code, the debug log, and docs. It's about rating distance, and matchmaking is tier-agnostic. Matching behavior is unchanged.
+- Eleven CSS classes inherited from Ascension's naming were renamed from `hon-*` to `xen-*` (sidebar, plugin layout, action buttons, compact rank badge). No behavior change, but custom themes or user CSS targeting those classes need updating; `NOTICE` lists the old names.
+- `XENITH.md` gains a design-decisions section covering why display rating and matchmaking share one uncertainty value, and the pure-math/impure-edges boundary the tests rely on.
 - `XENITH.md` retitled from "Architectural & Algorithmic Whitepaper" to "Xenith Ratings Explainer" and rewritten to improve readability. Section numbers are unchanged.
 - `README.md`, `qa/README.md` and `NOTICE` rewritten to improve readability. `NOTICE` now covers Ascension v1.2.6 only.
 - `qa/README.md`: the cooldown checklist now says 20 matches, matching the buffer size.
