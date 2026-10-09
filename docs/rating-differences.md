@@ -4,7 +4,7 @@ If you've looked at more than one rating plugin for Stash, you've probably notic
 
 Two principles drove most of it. I wanted the source code fully transparent, even before bundling, and I wanted to reuse as many of Stash's native components as possible.
 
-Xenith kept a lot from that fork: the forced cross-tier match event and its trigger odds, the session repeat-opponent penalty and its weight bands, recently-selected candidate tracking, the sigmoid shape of the K-factor curve (with a new asymptote and library-scaled endpoints), and the top-N weighted seed pool. `NOTICE` has the full accounting. This doc covers what changed and why. It compares against v1.2.6 only and will not be updated for anything Ascension has done since.
+Xenith kept a lot from that fork: the forced wide-gap match event and its trigger odds, the session repeat-opponent penalty and its weight bands, recently-selected candidate tracking, the sigmoid shape of the K-factor curve (with a new asymptote and library-scaled endpoints), and the top-N weighted seed pool. `NOTICE` has the full accounting. This doc covers what changed and why. It compares against v1.2.6 only and will not be updated for anything Ascension has done since.
 
 See the [ratings explainer](../XENITH.md) for how Xenith's own math works end to end.
 

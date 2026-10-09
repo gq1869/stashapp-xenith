@@ -19,7 +19,7 @@ they apply:
   and scales the endpoints to library size.
 - The low-match boost and its three multiplier constants
   (`src/matchmaking.js`). Xenith changes the baseline calculation.
-- The forced cross-tier match event, its trigger probability, and its
+- The forced wide-gap match event, its trigger probability, and its
   minimum rating-gap threshold (`src/matchmaking.js`).
 - The top-N weighted seed pool and its pool size (`src/matchmaking.js`).
 - Recently-selected candidate tracking (`addToRecentlySelected` and

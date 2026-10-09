@@ -304,7 +304,7 @@ describe("elo.js", () => {
     assert.equal(getRatingTier(DEFAULT_RATING), "C");
   });
 
-  test("getRatingTier boundaries match TIER_BOUNDS tier table (cross-tier-aware calibration sim)", () => {
+  test("getRatingTier boundaries match TIER_BOUNDS tier table (wide-gap-aware calibration sim)", () => {
     assert.equal(getRatingTier(100), "S");
     assert.equal(getRatingTier(99.9), "A");
     assert.equal(getRatingTier(84), "A");

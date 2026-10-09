@@ -23,9 +23,8 @@
 //   accepted if within 15 rating points of the seed (reusing the same
 //   15-point anchor window the real matchmaking system uses) — retried
 //   up to 30 times, then
-//   falls back to the next index. A 10% forced cross-tier match (>=20pt
-//   gap — no tier-eligibility gate, matching production since the
-//   S-excludes-sub-B `canBattleByTier` gate was removed) is attempted
+//   falls back to the next index. A 10% forced wide-gap match (>=20pt
+//   gap matching production) is attempted
 //   first, falling through to the anchor-window pick on failure — omitting
 //   this shifts p10 from 7->0 and p30 from 26->20 under the current
 //   formulas, material enough that it's modeled here rather than left out. Weighting
@@ -82,7 +81,7 @@
 // occupancy dropped only modestly with more matches, and stayed well above
 // the 3% target regardless of match volume. That pointed at a fidelity gap
 // in the sim rather than a convergence-speed issue: the sim was missing the
-// 10% forced cross-tier match production's selectWeightedPair performs (now
+// 10% forced wide-gap match production's selectWeightedPair performs (now
 // modeled above via CROSS_TIER_CHANCE/CROSS_TIER_MIN_GAP), which is exactly
 // the mechanism that pulls boundary-drifted candidates back into competition
 // with the rest of the pool. Adding it dropped ceiling occupancy to the
@@ -125,7 +124,7 @@ const TRUE_SKILL_SD = 8;
 const ANCHOR_WINDOW = 15; // reuses XENITH.md's "anchor opponent within 15 rating points" rule
 const ANCHOR_MAX_ATTEMPTS = 30;
 
-// The original sim omitted the 10% forced cross-tier match (matchmaking.js's
+// The original sim omitted the 10% forced wide-gap match (matchmaking.js's
 // selectWeightedPair) entirely — omitting it shifts p10 from 7->0 and p30
 // from 26->20 under the current formulas, material enough to model.
 // Reproducing it here rather than reimplementing matchmaking.js's full opponent-
@@ -184,10 +183,10 @@ while (played < totalPairwiseMatches) {
   const i = randInt(POPULATION);
   let j = null;
 
-  // 10% forced cross-tier match, mirroring selectWeightedPair: wide gap
+  // 10% forced wide-gap match, mirroring selectWeightedPair: wide gap
   // (>=20). Falls through to the normal anchor-window pick below if no
   // eligible candidate turns up within the attempt budget — same cascade
-  // shape as production's cross-tier -> 15pt anchor -> wider failovers.
+  // shape as production's wide-gap -> 15pt anchor -> wider failovers.
   if (Math.random() < CROSS_TIER_CHANCE) {
     let attempts = 0;
     let candidate = randInt(POPULATION);

@@ -182,7 +182,7 @@ _Caveat: this doesn't inflate ratings the other way either. A champion beating a
 
 The reign cap is 10 defenses (`MAX_DEFENSES` in `src/champion.js`). An unbeaten champion's matches grow predictable as expected score climbs toward 1 (§3.6), so the tenth defense tells you almost nothing. A long reign also turns the comparison graph into a hub connected only through the champion, the same structural concern as Gauntlet's match cap. At the cap a fresh seed is drawn through ordinary matchmaking; a challenger win at any point starts a new reign at zero defenses.
 
-Champion is ordinary matchmaking with the seed pinned: the champion is stage 1, and the entropy-weighted opponent search, cross-tier events and failover run verbatim. Any improvement to shared selection applies automatically. There's no ladder dependency, so both content types have supported it from day one.
+Champion is ordinary matchmaking with the seed pinned: the champion is stage 1, and the entropy-weighted opponent search, wide-gap events and failover run verbatim. Any improvement to shared selection applies automatically. There's no ladder dependency, so both content types have supported it from day one.
 
 ## 4. In-Depth Algorithmic & Statistical Rationales
 
@@ -199,7 +199,7 @@ In zero-sum Elo, a big enough upset inflicts a severe penalty on a heavy favorit
 Two nearby mechanisms leave gaps:
 
 1. K-factor decay (§3.2) scales by experience only. A brand-new item sits at maximum K, the most volatile setting, so decay protects it from nothing.
-2. Entropy pairing (§3.6) makes wide-gap matches less frequent but still possible. Forced cross-tier events and the failover chain can both still produce one.
+2. Entropy pairing (§3.6) makes wide-gap matches less frequent but still possible. Forced wide-gap events and the failover chain can both still produce one.
 
 Attenuation is the only one of the three that reacts to how surprising the actual result was. It covers exactly the case the others miss: a new item, unprotected by decay, landing in a wide-gap match that pairing didn't prevent.
 
@@ -238,7 +238,7 @@ Pairwise ratings cluster toward the middle, so the cutoffs are read off the sett
 
 Tiers key off the raw rating and ignore the discounted display rating. `rating100` is Stash's own field, so a Xenith badge always agrees with everything else Stash shows about that item. The uncertainty-discounted value stays where it's useful, the Leaderboard's Score column, instead of becoming a second notion of rating the rest of Stash can't see.
 
-The simulation models the 10% forced cross-tier match that real matchmaking performs; it's what pulls drifted items back into real competition and lands S at about 3.0 to 3.6%, close to the 3% target. The `TIER_BOUNDS` comment block has the calibration history.
+The simulation models the 10% forced wide-gap match that real matchmaking performs; it's what pulls drifted items back into real competition and lands S at about 3.0 to 3.6%, close to the 3% target. The `TIER_BOUNDS` comment block has the calibration history.
 
 ## 6. Execution Architecture
 
@@ -290,7 +290,7 @@ These names replaced ones inherited from an earlier plugin. Old data is still re
 
 Transitive delta propagation (§3.5, §4.4) is designed but unbuilt, and waits on the core formulas settling in production. One gap to solve first: a propagated change has no winner or opponent to log in the history format, and undo assumes every entry has exactly one of each. Propagation will need its own entry kind, probably not undoable the way a real match is.
 
-Gauntlet (§3.8): the tier-bounds simulation doesn't yet model Gauntlet runs. With enough real usage, add a share-of-matches-via-Gauntlet parameter to confirm posterior placement doesn't skew tier occupancy the way unmodeled cross-tier matching once did (§5).
+Gauntlet (§3.8): the tier-bounds simulation doesn't yet model Gauntlet runs. With enough real usage, add a share-of-matches-via-Gauntlet parameter to confirm posterior placement doesn't skew tier occupancy the way unmodeled wide-gap matching once did (§5).
 
 Champion (§3.9) retires a reign at a flat 10 defenses. A more principled rule ends it once the next defense's expected information gain drops below a threshold. Worth revisiting with real usage data to calibrate against.
 

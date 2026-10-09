@@ -423,7 +423,7 @@ async function fetchById(isScenes, id) {
 }
 
 // Picks an opponent for an already-chosen seed: the full pairwise
-// entropy/priority weighting (XENITH.md §3.6) plus the cross-tier / 15pt /
+// entropy/priority weighting (XENITH.md §3.6) plus the wide-gap / 15pt /
 // 25pt / nearest-rating / pure-random failover chain. Shared by Swiss
 // (seed = its own weighted pick) and Champion (seed = the reigning
 // champion) — Gauntlet's probe selection is a different, ladder-based
@@ -446,18 +446,18 @@ function selectOpponent(battleType, pool, seed, medianMatches) {
   /** @type {any} */
   let opponent = null;
 
-  const isCrossTier = Math.random() < 0.1;
-  if (isCrossTier) {
-    const crossTierCandidates = opponentCandidates.filter((p) => {
+  const isWideGap = Math.random() < 0.1;
+  if (isWideGap) {
+    const wideGapCandidates = opponentCandidates.filter((p) => {
       const rating = p.rating100 ?? DEFAULT_RATING;
       return Math.abs(rating - seedRating) >= 20;
     });
 
-    if (crossTierCandidates.length > 0) {
-      opponent = weightedPick(crossTierCandidates, (p) =>
+    if (wideGapCandidates.length > 0) {
+      opponent = weightedPick(wideGapCandidates, (p) =>
         calculateCandidateWeight(battleType, p, medianMatches, opponentContext)
       );
-      debugLog(`[Xenith] CROSS-TIER MATCH: ${displayName(seed)} vs ${displayName(opponent)}`);
+      debugLog(`[Xenith] WIDE-GAP MATCH: ${displayName(seed)} vs ${displayName(opponent)}`);
     }
   }
 
@@ -514,7 +514,7 @@ function selectOpponent(battleType, pool, seed, medianMatches) {
 }
 
 // Matchmaking here is tier-agnostic, with no S-Tier eligibility gate — the
-// cross-tier match logic (the 10% forced-pairing branch) lives in
+// wide-gap match logic (the 10% forced-pairing branch) lives in
 // selectOpponent above.
 export async function selectWeightedPair(battleType, selectedGenders) {
   const { pool, medianMatches, isScenes } = await loadCandidatePool(battleType, selectedGenders);

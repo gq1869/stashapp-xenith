@@ -182,7 +182,7 @@ export function priorityScore(h, sigmaA, sigmaB) {
 // this block whenever those formulas change.
 //
 // Methodology: 2500 performers, DEFAULT_RATING start, real elo.js formulas,
-// 15-pt anchor-window opponent selection with a 10% forced cross-tier match
+// 15-pt anchor-window opponent selection with a 10% forced wide-gap match
 // (min 20-pt gap, mirroring matchmaking.js's selectWeightedPair),
 // systemConfig = computeSystemConfig(2500), Normal(50, 8) hidden true skill,
 // run to 200 avg matches/performer. Percentiles confirmed stable across 5
@@ -198,14 +198,11 @@ export function priorityScore(h, sigmaA, sigmaB) {
 // Ceiling occupancy ~3.0-3.6% (avg ~3.3%), floor ~3.4-4.0% — both close to
 // `XENITH.md` §5's 3% target. S is structurally [100, 100] (a single
 // point — a flat rating100-keyed lookup can't split tied ceiling mass
-// further). The cross-tier match matters here: without it, opponent
+// further). The wide-gap match matters here: without it, opponent
 // selection anchored purely on current rating lets rating-drifted outliers
 // near a boundary only ever face other similarly-drifted opponents, driving
 // ceiling/floor occupancy toward ~6-7% instead — see XENITH.md §5's
-// implementation note for the full writeup of that failure mode. Re-verified after removing the
-// S-excludes-sub-B `canBattleByTier` gate from matchmaking — bounds
-// held unchanged, since the gate barely bound production selection to
-// begin with.
+// implementation note for the full writeup of that failure mode.
 export const TIER_BOUNDS = {
   S: [100, 100],
   A: [84, 100],

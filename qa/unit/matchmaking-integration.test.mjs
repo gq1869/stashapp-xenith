@@ -83,7 +83,7 @@ function mockGql(query, variables) {
 
 // Tier-heavy pool: 70 C/D performers vs. a handful of S/A/B/F, mirroring
 // the checklist's "mostly C/D" extended-session scenario. Minority tiers are
-// kept small on purpose — this isolates entropy weighting + cross-tier
+// kept small on purpose — this isolates entropy weighting + wide-gap
 // events as the surfacing mechanism, now that matchmaking is tier-agnostic
 // with no tier-rotation gate steering selection.
 function makePerformer(id, rating, gender) {
@@ -192,8 +192,8 @@ describe("selectWeightedPair — extended session behavior", () => {
     assert.equal(persisted.recentMatchBuffer.performers.length, 20, "cooldown buffer caps at 20 entries");
   });
 
-  test("extended session in a C/D-heavy pool occasionally surfaces performers from other tiers (entropy weighting + cross-tier events)", async () => {
-    // 150 matches, not 40: cross-tier events are only a 10% per-match roll
+  test("extended session in a C/D-heavy pool occasionally surfaces performers from other tiers (entropy weighting + wide-gap events)", async () => {
+    // 150 matches, not 40: wide-gap events are only a 10% per-match roll
     // (XENITH.md's match-selection section), so a 40-match run has a ~1.5% chance of
     // rolling zero even when the mechanism is working correctly — a real
     // but not CI-safe flake rate. 150 matches drops that false-negative
@@ -235,7 +235,7 @@ describe("selectWeightedPair — extended session behavior", () => {
     );
   });
 
-  test("scenes: extended session in a C/D-heavy pool occasionally surfaces scenes from other tiers (entropy weighting + cross-tier events)", async () => {
+  test("scenes: extended session in a C/D-heavy pool occasionally surfaces scenes from other tiers (entropy weighting + wide-gap events)", async () => {
     scenePool = buildTierHeavyScenePool();
     const seenTiers = new Set();
     for (let i = 0; i < 150; i++) {
