@@ -1,4 +1,4 @@
-# How Xenith's ratings differ from Ascension's
+# How Xenith's ratings differ
 
 If you've looked at more than one rating plugin for Stash, you've probably noticed they are all related. Xenith started as a fork of [Ascension](https://github.com/Servbot91/Sakotos-Stash-Repo/tree/main/plugins/Ascension) v1.2.6, then diverged: I rewrote the rating engine and the interface against different design principles.
 
