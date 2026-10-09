@@ -21,11 +21,11 @@ Pairwise-comparison ratings settle clustered near the middle of the scale, so ev
 
 ## 2. The rating gap should decide the odds
 
-I wanted to keep using Stash's native 0–100 `rating100`. Standard Elo runs on an unbounded scale into the thousands, and Ascension computed win probability with its standard divisor, `D = 400`.
+I wanted to keep using Stash's native 0–100 `rating100`. Standard Elo runs on an unbounded scale into the thousands, and Ascension computed win probability with its standard divisor, $D = 400$.
 
 That means the favorite's expected win probability ranges from 50.0% to 64.0% across any possible matchup. A 10-point rating gap has an expected win probability of 51.4%, close to a coin flip, and even the most lopsided matchup, a 100-point gap, tops out at 64%.
 
-Xenith uses `D = 35` instead. The same 10-point gap reads as 65.9%, and a 40-point gap reads as 93.3%. The gap between two ratings now decides how surprising a result is, so a rating change reflects how mismatched the pair was.
+Xenith uses $D = 35$ instead. The same 10-point gap reads as 65.9%, and a 40-point gap reads as 93.3%. The gap between two ratings now decides how surprising a result is, so a rating change reflects how mismatched the pair was.
 
 ## 3. Each click should teach something
 
@@ -35,7 +35,7 @@ Xenith weights candidates by the Shannon entropy of the likely outcome, scaled b
 
 Recency answers "it's been a while since this one played." Entropy answers "which comparison would tell us the most right now." An evenly matched pair of well-known items can still be very informative, and recency alone can't see that.
 
-This builds on section 2. Under `D = 400` every pair sits between 50% and 64%, so outcome entropy is near its maximum everywhere and can't tell pairs apart. `D = 35` spreads the odds enough for entropy to discriminate.
+This builds on section 2. Under $D = 400$ every pair sits between 50% and 64%, so outcome entropy is near its maximum everywhere and can't tell pairs apart. $D = 35$ spreads the odds enough for entropy to discriminate.
 
 ## 4. A match shouldn't create rating out of nothing
 
@@ -66,7 +66,7 @@ The stack leaves visible artifacts. At a 90-vs-88 matchup, Ascension gives the w
 
 Ascension's display score (`compositeScore`) is `rating/100 + winRate * 0.5 + winMargin/1000 + totalMatches/10000`. But `rating100` already is the accumulated record of every win and loss, so adding win rate re-counts it, and the match-count term pays out again for volume. A performer who won their only match can outrank one with a strong rating over 40 matches.
 
-Xenith's is `max(0, rating - 1.645 * sigma) / 100`, where sigma shrinks as match count grows: a one-sided 90% confidence bound that discounts a thin record. In `XENITH.md` §4.3's example, a fresh performer at 1 match and a raw 66 displays at about 48.5, while a 40-match veteran at a raw 53 displays at about 49.1. The veteran still edges out the newcomer.
+Xenith's is $\max(0,\ R - 1.645\,\sigma)/100$, where $\sigma$ shrinks as match count grows: a one-sided 90% confidence bound that discounts a thin record. In `XENITH.md` §4.3's example, a fresh performer at 1 match and a raw 66 displays at about 48.5, while a 40-match veteran at a raw 53 displays at about 49.1. The veteran still edges out the newcomer.
 
 ## 7. A smaller pool, redrawn every match
 
