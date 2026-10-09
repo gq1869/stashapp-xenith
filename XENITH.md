@@ -1,14 +1,14 @@
 # Xenith Ratings Explainer
 
-How Xenith's rating and matchmaking system works, grounded in the code rather than a generic description of "an Elo engine." For how it differs from the plugin it forked, see [`docs/rating-differences.md`](docs/rating-differences.md).
+How Xenith's rating and matchmaking system works. For how it differs from the plugin it forked, see [`docs/rating-differences.md`](docs/rating-differences.md).
 
 ## 1. Executive Summary & Design Philosophy
 
-Xenith is a Stash plugin for triaging your own library, performers and scenes both, by picking a winner in head-to-head matchups. Under the hood it runs a variant of Elo, the system chess uses to rank players: every comparison nudges both items' ratings based on who won and how surprising that was.
+Xenith is a Stash plugin for rating your own library, performers and scenes both, by picking a winner in head-to-head matchups. Under the hood it runs a variant of Elo, the system chess uses to rank players: every comparison nudges both items' ratings based on who won and how surprising that was.
 
 Standard Elo was built for an open-ended scale that runs into the thousands. Xenith adapts the same ideas to a scale fixed at 0 to 100, because that's Stash's own `rating100` field. Stash already sorts, filters and searches by it, so a Xenith rating is a real Stash rating, with no shadow value that only the plugin understands.
 
-I wanted real signal out of few clicks, with no extra friction. Picking the most informative pairing, letting new items move fast while settled ones move slowly, and discounting a rating's display value until enough matches back it up all squeeze structure out of a modest amount of voting. Every update is one direct database write the moment you pick a winner. Nothing runs in the background.
+I wanted real signal out of few clicks, with no extra friction. Picking the most informative pairing, letting new items move fast while settled ones move slowly, and discounting a rating's display value until enough matches back it up all squeeze structure out of a modest amount of voting.
 
 ## 2. Core Principles & Human Factors
 
@@ -72,7 +72,7 @@ The trigger is a gap over 15 rating points where the higher-rated item loses. Dr
 
 The factor is identical on both sides; the point totals can still differ because each side keeps its own K (§3.2).
 
-I dampen both sides because dampening only the favorite's loss was tried and dropped, for two reasons. It's a one-way pump: the underdog gains more than the favorite loses, and on a scale capped at 100 that excess piles up at the ceiling until S tier means less. And the premise, "this result might be noise," applies equally to the underdog's gain; fully rewarding it while doubting the loss doesn't hold together.
+I dampen both sides for two reasons. It's a one-way pump: the underdog gains more than the favorite loses, and on a scale capped at 100 that excess piles up at the ceiling until S tier means less. And the premise, "this result might be noise," applies equally to the underdog's gain; fully rewarding it while doubting the loss doesn't hold together.
 
 _Caveat: a match can still net positive rating when the two sides carry different K-factors. A fresh, high-K underdog beating a settled favorite is a deliberate inflow, because new items should move fast (§4.1). Attenuation only guarantees it can't create rating by itself._
 
@@ -233,7 +233,7 @@ Tiers key off the raw rating and ignore the discounted display rating. `rating10
 
 The simulation models the 10% forced cross-tier match that real matchmaking performs; it's what pulls drifted items back into real competition and lands S at about 3.0 to 3.6%, close to the 3% target. The `TIER_BOUNDS` comment block has the calibration history.
 
-## 6. Real Execution Architecture
+## 6. Execution Architecture
 
 Xenith has no always-on engine. On the frontend, every rating update is one synchronous database write the moment you pick a winner: one per side, no batching, no local cache in front of it.
 
