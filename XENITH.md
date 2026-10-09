@@ -16,7 +16,7 @@ I wanted real signal out of few clicks, with no extra friction. Picking the most
 
 Elo predicts the odds from the rating gap using one tunable knob, a scale factor `D`. A smaller `D` makes the same gap predict a more lopsided result.
 
-Standard Elo's `D = 400` is tuned for ratings in the thousands; squeezed onto 0 to 100, the knob barely turns. Xenith sets `D = 35`. A 10-point gap now predicts the higher-rated item wins about two times out of three (65.9%), and a 40-point gap predicts 93.3%. See `docs/rating-differences.md` §2 for the `D = 400` numbers.
+Standard Elo's $D = 400$ is tuned for ratings in the thousands; squeezed onto 0 to 100, the knob barely turns. Xenith sets $D = 35$. A 10-point gap now predicts the higher-rated item wins about two times out of three (65.9%), and a 40-point gap predicts 93.3%. See `docs/rating-differences.md` §2 for the $D = 400$ numbers.
 
 ### 2.2 Starting New Items at 50, Not 0
 
@@ -60,11 +60,11 @@ m_{\text{decay}}(N) &= \operatorname{clamp}\bigl(\lfloor 15 + 15\log_{10}(N/100)
 \end{aligned}
 $$
 
-At roughly 2,500 items that's `kMax = 32`, `kMin = 12`, `mDecay = 35`: a brand-new item moves up to 32 points on an upset, a veteran at most 12.
+At roughly 2,500 items that's $k_{\max} = 32$, $k_{\min} = 12$, $m_{\text{decay}} = 35$: a brand-new item moves up to 32 points on an upset, a veteran at most 12.
 
-The shipped curve is a sigmoid with a fixed midpoint at 18 matches. It replaced the straight line `K(m) = kMax - (kMax - kMin) * min(1, m/mDecay)` first spec'd. Only the endpoints are dynamic; `mDecay` is computed but not wired into the curve's shape yet. The sigmoid's asymptote is `kMax / 3`: across every supported library size `kMin` sits between a third and two-fifths of `kMax`, so `/3` is the largest asymptote that still lets a settled item actually reach `kMin`. See `src/elo.js`'s `experienceFactor`.
+The shipped curve is a sigmoid with a fixed midpoint at 18 matches. It replaced the straight line $K(m) = k_{\max} - (k_{\max} - k_{\min})\min(1, m/m_{\text{decay}})$ first spec'd. Only the endpoints are dynamic; $m_{\text{decay}}$ is computed but not wired into the curve's shape yet. The sigmoid's asymptote is $k_{\max}/3$: across every supported library size $k_{\min}$ sits between a third and two-fifths of $k_{\max}$, so $/3$ is the largest asymptote that still lets a settled item actually reach $k_{\min}$. See `src/elo.js`'s `experienceFactor`.
 
-Decay is the only thing slowing high-rated items. There's no second tier-based brake; a match between two top-tier items already swings little because `D = 35` compresses the expected-score gap at close ratings, and one mechanism is easier to reason about than two that interact.
+Decay is the only thing slowing high-rated items. There's no second tier-based brake; a match between two top-tier items already swings little because $D = 35$ compresses the expected-score gap at close ratings, and one mechanism is easier to reason about than two that interact.
 
 ### 3.3 Underdog Loss Mitigation
 
@@ -117,7 +117,7 @@ $$
 \text{priority}(A, B) = H(A, B)\left(1 + 0.5\cdot\frac{\sigma_A + \sigma_B}{15}\right)
 $$
 
-The `/15` normalizes sigma against its maximum (a brand-new item's), so the `0.5` weight applies to a 0-to-1 value. Unnormalized, uncertainty could outweigh entropy up to 15x and priority would mostly be a novelty score with entropy as a tiebreaker.
+The $/15$ normalizes sigma against its maximum (a brand-new item's), so the $0.5$ weight applies to a 0-to-1 value. Unnormalized, uncertainty could outweigh entropy up to 15x and priority would mostly be a novelty score with entropy as a tiebreaker.
 
 There's no tier-rotation or tier-balancing logic; entropy is the only driver of pairing priority. Items in a rarely-visited tier tend to carry high uncertainty, so undersampled tiers should get attention on their own. That expectation hasn't been measured separately.
 
@@ -154,7 +154,7 @@ The search runs on raw `rating100`, not the display rating. Display rating impro
 
 The next probe comes from the 5 ladder entries nearest the posterior median (the most informative next test, a binary search's midpoint expressed as belief), excluding anyone already faced, weighted by §3.6's entropy. That keeps the same gatekeeper from being probed every run.
 
-A run is at least 10 matches and at most 14 (`MIN_MATCHES`, `MAX_MATCHES` in `src/gauntlet.js`). It ends at the cap, or earlier once past the minimum when the posterior's 80% credible interval narrows to `max(5, ceil(ladderSize * 0.02))` positions or fewer. Because that target scales with ladder size, a larger library places more coarsely in absolute rank.
+A run is at least 10 matches and at most 14 (`MIN_MATCHES`, `MAX_MATCHES` in `src/gauntlet.js`). It ends at the cap, or earlier once past the minimum when the posterior's 80% credible interval narrows to $\max(5, \lceil 0.02 \cdot \text{ladderSize} \rceil)$ positions or fewer. Because that target scales with ladder size, a larger library places more coarsely in absolute rank.
 
 No gauntlet-specific K multiplier or streak dampener exists (same single-mechanism reasoning as §3.2/§3.9); the challenger's K decays through the normal sigmoid as its match count climbs.
 
@@ -168,7 +168,7 @@ The ladder is frozen for the whole run, since each posterior position maps to a 
 
 One incumbent defends its spot against a stream of challengers for as long as it keeps winning. Unlike Gauntlet there's no falling phase; a reign ends by a loss or by hitting its cap.
 
-Other plugins halve K for this mode so an unbeaten incumbent stops gaining at full speed. Xenith adds nothing; `src/elo.js` is untouched. `D = 35` already shrinks the gain per win as the lead grows:
+Other plugins halve K for this mode so an unbeaten incumbent stops gaining at full speed. Xenith adds nothing; `src/elo.js` is untouched. $D = 35$ already shrinks the gain per win as the lead grows:
 
 | Champion's rating lead | Expected score | Gain per win |
 | --- | --- | --- |
@@ -188,9 +188,9 @@ Champion is ordinary matchmaking with the seed pinned: the champion is stage 1, 
 
 ### 4.1 Why K-Factor Scales With Library Size
 
-A fixed K would feel too fast in a small library and too slow in a large one. Scaling the upper bound keeps a new item's initial velocity right at 500 items or 50,000; at the 2,500-item reference (`kMax = 32`), a new item leaves the neutral zone quickly and finds roughly its tier within its calibration window.
+A fixed K would feel too fast in a small library and too slow in a large one. Scaling the upper bound keeps a new item's initial velocity right at 500 items or 50,000; at the 2,500-item reference ($k_{\max} = 32$), a new item leaves the neutral zone quickly and finds roughly its tier within its calibration window.
 
-The `kMin` floor of 12 keeps long-term flexibility. Taste changes, and a real floor lets an established item's rank shift smoothly while a single fluke still can't cause a wild swing. The shipped curve doesn't use `mDecay` directly (§3.2).
+The $k_{\min}$ floor of 12 keeps long-term flexibility. Taste changes, and a real floor lets an established item's rank shift smoothly while a single fluke still can't cause a wild swing. The shipped curve doesn't use $m_{\text{decay}}$ directly (§3.2).
 
 ### 4.2 Why Underdog Protection Isn't Redundant
 
@@ -203,13 +203,13 @@ Two nearby mechanisms leave gaps:
 
 Attenuation is the only one of the three that reacts to how surprising the actual result was. It covers exactly the case the others miss: a new item, unprotected by decay, landing in a wide-gap match that pairing didn't prevent.
 
-It matters more under `D = 35`. At a 70-point gap, `D = 400` predicts about 60% for the favorite, a mild surprise if the underdog wins. `D = 35` predicts about 99%, so an upset there would otherwise swing the rating hard.
+It matters more under $D = 35$. At a 70-point gap, $D = 400$ predicts about 60% for the favorite, a mild surprise if the underdog wins. $D = 35$ predicts about 99%, so an upset there would otherwise swing the rating hard.
 
 ### 4.3 Why the Display Rating Protects Against Lucky Streaks
 
-An initial uncertainty of 15 reflects not knowing where in the middle tiers a fresh item belongs, and dividing by `sqrt(matches + 1)` is the standard shape for uncertainty shrinking as evidence arrives.
+An initial uncertainty of 15 reflects not knowing where in the middle tiers a fresh item belongs, and dividing by $\sqrt{\text{matches} + 1}$ is the standard shape for uncertainty shrinking as evidence arrives.
 
-A fresh item at 50 wins its first match against another 50 and jumps to 66. Unadjusted, it would outrank a veteran with 40 matches settled at a raw 53. With §3.4's formula the newcomer displays at `66 - 1.645 * 15/sqrt(2)`, about 48.5, and the veteran at `53 - 1.645 * 15/sqrt(41)`, about 49.1. The veteran still edges out the newcomer. This affects only the Leaderboard's Score column and sort order, never tiers (§5).
+A fresh item at 50 wins its first match against another 50 and jumps to 66. Unadjusted, it would outrank a veteran with 40 matches settled at a raw 53. With §3.4's formula the newcomer displays at $66 - 1.645 \cdot 15/\sqrt{2}$, about 48.5, and the veteran at $53 - 1.645 \cdot 15/\sqrt{41}$, about 49.1. The veteran still edges out the newcomer. This affects only the Leaderboard's Score column and sort order, never tiers (§5).
 
 ### 4.4 Future Feature: Keeping Propagated Ratings From Spiraling
 
