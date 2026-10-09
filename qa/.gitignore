@@ -1,0 +1,6 @@
+# QA / Testing
+test-results/
+playwright-report/
+blob-report/
+
+debug.png
