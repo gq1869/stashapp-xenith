@@ -198,17 +198,20 @@ export function priorityScore(h, sigmaA, sigmaB) {
 // 15-pt anchor-window opponent selection with a 10% forced wide-gap match
 // (min 20-pt gap, mirroring matchmaking.js's selectWeightedPair),
 // systemConfig = computeSystemConfig(2500), Normal(50, 8) hidden true skill,
-// run to 200 avg matches/performer. Percentiles confirmed stable across 5
-// reruns, all agreeing within +/-1 point.
+// run to 200 avg matches/performer. Rerun 13 times after wiring mDecay into
+// experienceFactor's sigmoid (see kFactor's comment); percentiles agreed
+// within +/-1 point except the D floor, which moved from a 9/10 split to a
+// clear 10 majority (9:4, 10:9) — a real, if small, shift from the sigmoid's
+// baseline midpoint moving 18->17.5.
 //
 // Settled percentiles (linear-interpolation method) on raw rating100:
-//   10th pct = 9    (D floor)
+//   10th pct = 10   (D floor)
 //   30th pct = 31   (C floor)
 //   60th pct = 59   (B floor)
 //   85th pct = 84   (A floor)
 //   97th pct = 100  (S floor)
 //
-// Ceiling occupancy ~3.0-3.6% (avg ~3.3%), floor ~3.4-4.0% — both close to
+// Ceiling occupancy ~3.2-4.1% (avg ~3.7%), floor ~3.3-4.1% — both close to
 // `XENITH.md` §5's 3% target. S is structurally [100, 100] (a single
 // point — a flat rating100-keyed lookup can't split tied ceiling mass
 // further). The wide-gap match matters here: without it, opponent
@@ -221,8 +224,8 @@ export const TIER_BOUNDS = {
   A: [84, 100],
   B: [59, 84],
   C: [31, 59],
-  D: [9, 31],
-  F: [0, 9],
+  D: [10, 31],
+  F: [0, 10],
 };
 
 // Explicit descending ladder rather than iterating Object.entries(TIER_BOUNDS)

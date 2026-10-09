@@ -10,7 +10,7 @@ See the [ratings explainer](../XENITH.md) for how Xenith's own math works end to
 
 ## 1. A tier letter should mean the same thing in every library
 
-After playing Ascension for a while, my library's tiers came out bottom heavy, and I wanted a different shape: a tier letter that means the same share of any library. Ascension's v1.2.6 floors are round numbers: S at 85, then A at 70, B at 55, C at 40, D at 25. Xenith's (`TIER_BOUNDS`: 100, 84, 59, 31, 9) come out of a Monte Carlo simulation (`qa/scripts/simulate-tier-bounds.mjs`) run against Xenith's own rating math, targeting the percentiles in `XENITH.md` §5.
+After playing Ascension for a while, my library's tiers came out bottom heavy, and I wanted a different shape: a tier letter that means the same share of any library. Ascension's v1.2.6 floors are round numbers: S at 85, then A at 70, B at 55, C at 40, D at 25. Xenith's (`TIER_BOUNDS`: 100, 84, 59, 31, 10) come out of a Monte Carlo simulation (`qa/scripts/simulate-tier-bounds.mjs`) run against Xenith's own rating math, targeting the percentiles in `XENITH.md` §5.
 
 Pairwise-comparison ratings settle clustered near the middle of the scale, so evenly spaced cutoffs land far from the intended shares. Running the same 2,500-performer settled population through both sets:
 

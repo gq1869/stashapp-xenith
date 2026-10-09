@@ -335,8 +335,8 @@ describe("elo.js", () => {
     assert.equal(getRatingTier(58.9), "C");
     assert.equal(getRatingTier(31), "C");
     assert.equal(getRatingTier(30.9), "D");
-    assert.equal(getRatingTier(9), "D");
-    assert.equal(getRatingTier(8.9), "F");
+    assert.equal(getRatingTier(10), "D");
+    assert.equal(getRatingTier(9.9), "F");
     assert.equal(getRatingTier(0), "F");
   });
 

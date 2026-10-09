@@ -238,7 +238,7 @@ Pairwise ratings cluster toward the middle, so the cutoffs are read off the sett
 
 Tiers key off the raw rating and ignore the discounted display rating. `rating100` is Stash's own field, so a Xenith badge always agrees with everything else Stash shows about that item. The uncertainty-discounted value stays where it's useful, the Leaderboard's Score column, instead of becoming a second notion of rating the rest of Stash can't see.
 
-The simulation models the 10% forced wide-gap match that real matchmaking performs; it's what pulls drifted items back into real competition and lands S at about 3.0 to 3.6%, close to the 3% target. The `TIER_BOUNDS` comment block has the calibration history.
+The simulation models the 10% forced wide-gap match that real matchmaking performs; it's what pulls drifted items back into real competition and lands S at about 3.2 to 4.1%, close to the 3% target. The `TIER_BOUNDS` comment block has the calibration history.
 
 ## 6. Execution Architecture
 
