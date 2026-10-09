@@ -62,7 +62,7 @@ $$
 
 At roughly 2,500 items that's $k_{\max} = 32$, $k_{\min} = 12$, $m_{\text{decay}} = 35$: a brand-new item moves up to 32 points on an upset, a veteran at most 12.
 
-The shipped curve is a sigmoid with a fixed midpoint at 18 matches. It replaced the straight line $K(m) = k_{\max} - (k_{\max} - k_{\min})\min(1, m/m_{\text{decay}})$ first spec'd. Only the endpoints are dynamic; $m_{\text{decay}}$ is computed but not wired into the curve's shape yet. The sigmoid's asymptote is $k_{\max}/3$: across every supported library size $k_{\min}$ sits between a third and two-fifths of $k_{\max}$, so $/3$ is the largest asymptote that still lets a settled item actually reach $k_{\min}$. See `src/elo.js`'s `experienceFactor`.
+K follows a sigmoid whose midpoint and slope both scale with $m_{\text{decay}}$ (midpoint $m_{\text{decay}}/2$, slope $m_{\text{decay}}/6$; 17.5 matches at about 2,500 items), so a bigger library gets a longer decay horizon along with its wider K range. The sigmoid's asymptote is $k_{\max}/3$: across every supported library size $k_{\min}$ sits between a third and two-fifths of $k_{\max}$, so $/3$ is the largest asymptote that still lets a settled item actually reach $k_{\min}$. See `src/elo.js`'s `experienceFactor`.
 
 Decay is the only thing slowing high-rated items. There's no second tier-based brake; a match between two top-tier items already swings little because $D = 35$ compresses the expected-score gap at close ratings, and one mechanism is easier to reason about than two that interact.
 

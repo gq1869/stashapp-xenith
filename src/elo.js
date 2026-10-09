@@ -16,8 +16,9 @@ export const DEFAULT_RATING = 50;
 // System-scaled K-factor bounds, computed from a content type's live item
 // count (Performers/Scenes resolved independently — see matchmaking.js).
 // Log-scaled so a bigger library gets a wider velocity range without
-// hand-tuning per deployment. mDecay is computed here but not yet wired into
-// kFactor's sigmoid — see kFactor's comment.
+// hand-tuning per deployment. mDecay drives experienceFactor's sigmoid shape
+// below (midpoint/slope), so a bigger library also gets a proportionally
+// longer decay horizon, not just a wider K range.
 export function computeSystemConfig(nTotal) {
   const kMin = clamp(Math.floor(8 + 3 * Math.log10(nTotal / 100)), 8, 16);
   const kMax = clamp(Math.floor(24 + 6 * Math.log10(nTotal / 100)), 24, 40);
@@ -32,25 +33,37 @@ export function computeSystemConfig(nTotal) {
 // range, so kMax * floor is <= kMin for every N, guaranteeing the
 // Math.max(kMin, ...) clamp below actually reaches kMin as matchCount grows
 // (exactly at the smallest-N case, via the floor clamp for every larger N).
-// A higher floor would make kMin unreachable at any library size. Sigmoid
-// midpoint (18 matches) and slope (/6) are unchanged — only the asymptote.
-function experienceFactor(matchCount) {
+// A higher floor would make kMin unreachable at any library size.
+//
+// Midpoint and slope are derived from mDecay (`XENITH.md` §3.2) rather than
+// fixed constants: midpoint = mDecay/2, slope = mDecay/6. That 3:1 ratio is
+// held fixed across every library size, so experienceFactor(0) — a brand-new
+// item's starting factor — is invariant (~0.969) regardless of mDecay; only
+// how fast the curve decays past that point scales with library size. At
+// the `XENITH.md` §3.2 baseline (N=2500, mDecay=35) this gives midpoint=17.5,
+// slope=5.833 — a sub-1-match nudge from the previous fixed 18/6, so
+// baseline behavior is preserved. The kMax/3 asymptote (FLOOR above) is
+// unaffected by this change and still guarantees kMin is reachable at every
+// library size, independent of mDecay.
+function experienceFactor(matchCount, mDecay) {
   const FLOOR = 1 / 3;
-  return FLOOR + (1 - FLOOR) / (1 + Math.exp((matchCount - 18) / 6));
+  const midpoint = mDecay / 2;
+  const slope = mDecay / 6;
+  return FLOOR + (1 - FLOOR) / (1 + Math.exp((matchCount - midpoint) / slope));
 }
 
 // Sigmoid endpoints are dynamic, sourced from systemConfig: kMax is the rate
 // new entities move at, kMin is a real, reachable floor (see
-// experienceFactor's comment). systemConfig.mDecay is computed but not
-// consumed here yet — wiring it into the decay curve is a later concern. No
-// rating-based dampening here by design: one dampening mechanism only (this
-// experience decay plus D=35's own compression at small gaps), no second
-// per-tier multiplier. `rating` is accepted but intentionally unused —
-// kept in the signature so a future dampening mechanism (if one is ever
-// added) doesn't require a call-site change to every caller.
+// experienceFactor's comment), and mDecay shapes how quickly the curve moves
+// between them. No rating-based dampening here by design: one dampening
+// mechanism only (this experience decay plus D=35's own compression at small
+// gaps), no second per-tier multiplier. `rating` is accepted but
+// intentionally unused — kept in the signature so a future dampening
+// mechanism (if one is ever added) doesn't require a call-site change to
+// every caller.
 export function kFactor(rating, matchCount, systemConfig) {
-  const { kMin, kMax } = systemConfig;
-  const k = kMax * experienceFactor(matchCount);
+  const { kMin, kMax, mDecay } = systemConfig;
+  const k = kMax * experienceFactor(matchCount, mDecay);
   return Math.min(kMax, Math.max(kMin, Math.round(k)));
 }
 

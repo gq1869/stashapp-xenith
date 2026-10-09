@@ -79,6 +79,28 @@ describe("elo.js", () => {
     assert.equal(highRatingK, lowRatingK, "kFactor should be rating-independent post tierDampener removal");
   });
 
+  test("kFactor's decay horizon scales with mDecay: a small library decays faster than a large one at the same match count", () => {
+    // `XENITH.md` §3.2's mDecay ranges from 15 (small N) to 50 (large N) via
+    // computeSystemConfig; experienceFactor derives its sigmoid midpoint/slope
+    // from mDecay, so a small library should reach kMin sooner (fewer matches)
+    // than a large one, for a challenger sitting at a shared mid-range match
+    // count.
+    const small = computeSystemConfig(100); // mDecay 15
+    const large = computeSystemConfig(1_000_000); // mDecay 50
+    const midMatches = 25; // past small's decay horizon, well before large's
+    const smallK = kFactor(50, midMatches, small);
+    const largeK = kFactor(50, midMatches, large);
+    assert.equal(smallK, small.kMin, "small-library K should have fully decayed to kMin by 25 matches");
+    assert.ok(largeK > large.kMin, "large-library K should still be decaying at 25 matches, not yet at kMin");
+
+    // Both curves start at the same fraction of their own kMax at m=0 —
+    // the 3:1 midpoint:slope ratio is fixed regardless of mDecay, so
+    // experienceFactor(0) is invariant across library sizes.
+    const smallK0 = kFactor(50, 0, small);
+    const largeK0 = kFactor(50, 0, large);
+    assert.ok(Math.abs(smallK0 / small.kMax - largeK0 / large.kMax) < 0.02);
+  });
+
   test("calculateMatchOutcome: winner/loser both floor at 0, never negative", () => {
     const systemConfig = computeSystemConfig(2500);
     const { winnerGain, loserLoss } = calculateMatchOutcome({
