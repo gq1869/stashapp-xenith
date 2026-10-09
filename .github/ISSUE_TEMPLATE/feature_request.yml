@@ -60,7 +60,7 @@ body:
         A hint for triage, not binding — labels get set by a maintainer regardless.
       options:
         - "scoring — Elo math, K-factor, protections, composite score, tiers"
-        - "matchmaking — pair selection, weighting, cooldowns, cross-tier events"
+        - "matchmaking — pair selection, weighting, cooldowns, wide-gap events"
         - "interface — React components, styles, layout, motion"
         - "stash-integration — GraphQL calls, native-tree mounting, badge/tooltip injection"
         - "plugin-tasks — Python exec entry, wipe/reset/snapshot tasks, manifest"
